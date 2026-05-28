@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { generateEnglishWords } from "@/lib/english-baseline";
 import { calcAccuracy, calcRawWpm, calcWpm } from "@/lib/metrics";
@@ -24,11 +25,17 @@ interface EnglishBaselineModalProps {
 }
 
 export function EnglishBaselineModal({ open, onClose }: EnglishBaselineModalProps) {
-  return (
+  // Portal to <body> so the fixed overlay centers against the real viewport — a
+  // backdrop-filter on the sticky header would otherwise become its containing
+  // block and clip the modal at the top.
+  const content = (
     <AnimatePresence>
       {open && <BaselineRunner key="baseline" onClose={onClose} />}
     </AnimatePresence>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(content, document.body);
 }
 
 function BaselineRunner({ onClose }: { onClose: () => void }) {
