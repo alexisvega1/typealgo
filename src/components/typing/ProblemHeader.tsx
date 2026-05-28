@@ -60,7 +60,7 @@ export function ProblemHeader({
               : "Start typing to recall";
 
   return (
-    <header className="border-b border-border/60 px-6 py-4">
+    <header className="border-b border-border/60 px-4 py-3 sm:px-6 sm:py-4">
       <motion.div
         key={snippet.id}
         initial={{ opacity: 0, y: 6 }}

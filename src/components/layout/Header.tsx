@@ -18,8 +18,8 @@ export function Header() {
   const isTypingPage = pathname === "/";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
+    <header className="app-header sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
           <span className="logo-mark">TA</span>
           <span className="text-lg font-semibold tracking-tight">
@@ -27,9 +27,13 @@ export function Header() {
           </span>
         </Link>
 
-        {isTypingPage && <TrainingModeToggle />}
+        {isTypingPage && (
+          <div className="header-mode-toggle hidden min-w-0 flex-1 md:flex">
+            <TrainingModeToggle />
+          </div>
+        )}
 
-        <nav className="ml-auto flex items-center gap-2">
+        <nav className="ml-auto flex items-center gap-1 sm:gap-2">
           <SaveProgressPrompt />
           <SyncStatusIndicator />
           {NAV.map((item) => (
@@ -37,7 +41,7 @@ export function Header() {
               key={item.href}
               href={item.href}
               className={clsx(
-                "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                "header-nav-link hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors md:inline-flex",
                 pathname === item.href
                   ? "bg-surface-2 text-accent"
                   : "text-muted hover:text-foreground",
@@ -48,6 +52,12 @@ export function Header() {
           ))}
         </nav>
       </div>
+
+      {isTypingPage && (
+        <div className="header-mode-toggle-mobile border-t border-border/40 px-4 py-2 md:hidden">
+          <TrainingModeToggle />
+        </div>
+      )}
     </header>
   );
 }

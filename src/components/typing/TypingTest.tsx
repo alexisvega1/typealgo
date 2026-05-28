@@ -30,12 +30,15 @@ import {
 } from "@/lib/training-mode";
 import { resolveSprintProfile } from "@/lib/curriculum-engine";
 import { buildReviewAnalytics, computeSprintMetrics, linesForMotif } from "@/lib/modes";
-import type { SyntaxMotif } from "@/lib/types";
+import { useDeviceClass, useIsMobileLayout } from "@/hooks/use-device-class";
+import type { DeviceClass, SyntaxMotif } from "@/lib/types";
 import { useSettingsStore } from "@/stores/settings-store";
 import { useStatsStore } from "@/stores/stats-store";
 import type { CharToken, KeystrokeEvent, Snippet, TypingResult } from "@/lib/types";
 import { ProblemHeader } from "./ProblemHeader";
 import { LiveStats } from "./LiveStats";
+import { MobileActionBar } from "./MobileActionBar";
+import { MobileSessionBanner } from "./MobileSessionBanner";
 import { RecallConfidence } from "./RecallConfidence";
 import { ResultsPanel } from "./ResultsPanel";
 import { ReviewWorkspace } from "./ReviewWorkspace";
@@ -94,7 +97,7 @@ export function TypingTest() {
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
   const cursorRef = useRef<HTMLSpanElement>(null);
@@ -119,6 +122,10 @@ export function TypingTest() {
   const recallModeRef = useRef(
     effectiveRecallMode(settings.trainingMode, settings.recallMode),
   );
+  const deviceClassRef = useRef<DeviceClass>("desktop-keyboard");
+
+  const deviceClass = useDeviceClass();
+  const isMobileLayout = useIsMobileLayout();
 
   const activeRecallMode = effectiveRecallMode(settings.trainingMode, settings.recallMode);
   const isRecallActive = isRecallTraining(settings.trainingMode);
@@ -218,6 +225,20 @@ export function TypingTest() {
         intensity,
       ).blankMask;
 
+      if (deviceClassRef.current === "mobile-touch" && isRecallTraining(settings.trainingMode)) {
+        const mobileRecall =
+          recallModeRef.current === "skeleton" ? "skeleton" : "token-blank";
+        if (mobileRecall !== recallModeRef.current) {
+          recallModeRef.current = mobileRecall;
+          blankMaskRef.current = buildRecallPlan(
+            tokensRef.current,
+            next.code,
+            mobileRecall,
+            intensity,
+          ).blankMask;
+        }
+      }
+
       charRefs.current = new Array(tokensRef.current.length).fill(null);
       lineRefs.current = [];
       activeLineRef.current = -1;
@@ -235,6 +256,10 @@ export function TypingTest() {
       settings.trainingMode,
     ],
   );
+
+  useEffect(() => {
+    deviceClassRef.current = deviceClass;
+  }, [deviceClass]);
 
   useEffect(() => {
     if (finishedRef.current) return;
@@ -598,6 +623,7 @@ export function TypingTest() {
       recallMode: recallModeRef.current,
       recallMetrics,
       sprintMetrics,
+      deviceClass: deviceClassRef.current,
     };
     setResult(res);
     setFinished(true);
@@ -682,7 +708,7 @@ export function TypingTest() {
   );
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
+    (e: KeyboardEvent<HTMLInputElement>) => {
       if (finished) {
         if (e.key === "Escape") {
           e.preventDefault();
@@ -796,6 +822,16 @@ export function TypingTest() {
     [finished, finishedCoach, loadSnippet, updateCursor, ensureStarted, refreshStats, typeChar, revealCurrent, autoAdvanceStructural, finishTest, setRecallMode, setTrainingMode, typingEnabled, isReviewMode, reviewAnalytics, handleReviewNavigation, isSprintMode, sprintPhase, startSprintCountdown],
   );
 
+  const handleMobileNext = useCallback(() => {
+    if (finishedCoach) applySuggestedRecallMode(finishedCoach, setRecallMode, setTrainingMode);
+    loadSnippet(snippetRef.current?.id);
+  }, [finishedCoach, loadSnippet, setRecallMode, setTrainingMode]);
+
+  const handleMobileRetry = useCallback(() => {
+    if (finishedCoach) applySuggestedRecallMode(finishedCoach, setRecallMode, setTrainingMode);
+    loadSnippet();
+  }, [finishedCoach, loadSnippet, setRecallMode, setTrainingMode]);
+
   const codeLines = useMemo(() => {
     if (!snippet) return [];
     const tokens = tokenizeCode(snippet.code, snippet.language);
@@ -828,7 +864,7 @@ export function TypingTest() {
       id="typing-stage-panel"
       role="tabpanel"
       aria-labelledby={`training-mode-${settings.trainingMode}`}
-      className={`flex flex-1 flex-col training-atmosphere-${settings.trainingMode}`}
+      className={`flex flex-1 flex-col training-atmosphere-${settings.trainingMode}${isMobileLayout ? " typing-mobile" : ""}`}
     >
       <ProblemHeader
         snippet={snippet}
@@ -839,7 +875,16 @@ export function TypingTest() {
         companyTrack={settings.companyTrack}
         careerLevel={settings.careerLevel}
       />
-      <div className="typing-stage relative mx-auto w-full max-w-4xl flex-1 px-6 py-6" onPointerDown={() => inputRef.current?.focus()}>
+      <MobileSessionBanner
+        deviceClass={deviceClass}
+        trainingMode={settings.trainingMode}
+        onSwitchToRecall={() => {
+          setTrainingMode("recall");
+          setRecallMode("token-blank");
+        }}
+        onSwitchToReview={() => setTrainingMode("review")}
+      />
+      <div className="typing-stage relative mx-auto w-full max-w-4xl flex-1 px-4 py-4 sm:px-6 sm:py-6" onPointerDown={() => inputRef.current?.focus()}>
         {typingEnabled && !isSprintMode && (
           <LiveStats
             wpm={liveWpm}
@@ -847,6 +892,7 @@ export function TypingTest() {
             started={started}
             recallAccuracy={liveRecallAcc}
             showRecall={isRecallActive}
+            deviceClass={deviceClass}
           />
         )}
         {isSprintMode && (
@@ -927,16 +973,21 @@ export function TypingTest() {
             onMotifFocus={setReviewMotif}
           />
         )}
-        <div
+        <input
           ref={inputRef}
+          type="text"
           className="typing-input"
-          role="textbox"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          inputMode={isReviewMode ? "none" : "text"}
           tabIndex={typingEnabled || isReviewMode ? 0 : -1}
           aria-label={typingEnabled ? "Typing input" : "Typing paused in review mode"}
           aria-disabled={!typingEnabled}
           onKeyDown={handleKeyDown}
         />
-        <p className="mt-6 text-center text-sm text-muted typing-hints">
+        <p className="mt-6 hidden text-center text-sm text-muted typing-hints md:block">
           {isReviewMode ? (
             <>
               <kbd className="kbd">↑</kbd>/<kbd className="kbd">↓</kbd> lines ·{" "}
@@ -966,13 +1017,28 @@ export function TypingTest() {
           )}
         </p>
       </div>
+      <MobileActionBar
+        visible={isMobileLayout}
+        finished={finished}
+        trainingMode={settings.trainingMode}
+        reviewLine={reviewLine}
+        reviewLineCount={codeLines.length}
+        onRetry={handleMobileRetry}
+        onNext={handleMobileNext}
+        onReviewLinePrev={() => setReviewLine((l) => Math.max(0, l - 1))}
+        onReviewLineNext={() =>
+          setReviewLine((l) => Math.min(Math.max(0, codeLines.length - 1), l + 1))
+        }
+        onSetMode={setTrainingMode}
+      />
       <AnimatePresence>
         {finished && result && (
           <ResultsPanel
             result={result}
             snippet={snippet}
-            onRetry={() => loadSnippet()}
-            onNext={() => loadSnippet(snippet.id)}
+            deviceClass={deviceClass}
+            onRetry={handleMobileRetry}
+            onNext={handleMobileNext}
           />
         )}
       </AnimatePresence>

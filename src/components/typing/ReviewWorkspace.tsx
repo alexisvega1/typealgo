@@ -34,10 +34,13 @@ export function ReviewWorkspace({
       <div className="review-workspace-header">
         <div>
           <h3 className="text-sm font-medium">Consolidation</h3>
-          <p className="mt-1 text-xs text-muted leading-relaxed">
+          <p className="mt-1 text-xs text-muted leading-relaxed hidden md:block">
             Study and internalize this implementation pattern. Use{" "}
             <kbd className="kbd">↑</kbd>/<kbd className="kbd">↓</kbd> to step lines,{" "}
             <kbd className="kbd">[</kbd>/<kbd className="kbd">]</kbd> to focus motifs.
+          </p>
+          <p className="mt-1 text-xs text-muted leading-relaxed md:hidden">
+            Tap lines and motifs below to consolidate this pattern before your next recall rep.
           </p>
         </div>
         <div className="review-prior-stats">
@@ -59,7 +62,7 @@ export function ReviewWorkspace({
         <div className="mt-2 flex items-center gap-2">
           <button
             type="button"
-            className="review-step-btn"
+            className="review-step-btn review-step-btn-lg"
             onClick={() => onLineChange(Math.max(0, activeLine - 1))}
             aria-label="Previous line"
           >
@@ -70,7 +73,7 @@ export function ReviewWorkspace({
           </span>
           <button
             type="button"
-            className="review-step-btn"
+            className="review-step-btn review-step-btn-lg"
             onClick={() => onLineChange(Math.min(lineCount - 1, activeLine + 1))}
             aria-label="Next line"
           >
@@ -78,6 +81,45 @@ export function ReviewWorkspace({
           </button>
         </div>
       </div>
+
+      {analytics.motifStats.length > 0 && (
+        <div className="review-motif-stepper mt-4 md:hidden">
+          <span className="text-xs text-muted uppercase tracking-wider">Motif focus</span>
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              className="review-step-btn review-step-btn-lg"
+              onClick={() => {
+                const motifs = analytics.motifStats.map((m) => m.motif);
+                if (motifs.length === 0) return;
+                const idx = focusedMotif ? motifs.indexOf(focusedMotif) : -1;
+                onMotifFocus(motifs[(idx - 1 + motifs.length) % motifs.length]);
+              }}
+              aria-label="Previous motif"
+            >
+              ←
+            </button>
+            <span className="review-line-indicator truncate">
+              {focusedMotif
+                ? analytics.motifStats.find((m) => m.motif === focusedMotif)?.label ?? "Motif"
+                : "All motifs"}
+            </span>
+            <button
+              type="button"
+              className="review-step-btn review-step-btn-lg"
+              onClick={() => {
+                const motifs = analytics.motifStats.map((m) => m.motif);
+                if (motifs.length === 0) return;
+                const idx = focusedMotif ? motifs.indexOf(focusedMotif) : -1;
+                onMotifFocus(motifs[(idx + 1) % motifs.length]);
+              }}
+              aria-label="Next motif"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      )}
 
       {analytics.hotspotTokens.length > 0 && (
         <div className="mt-4">

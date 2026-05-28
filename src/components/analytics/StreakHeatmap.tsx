@@ -46,12 +46,12 @@ export function StreakHeatmap() {
 
   return (
     <section className="card">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="card-title">Activity</h2>
           <p className="card-subtitle">GitHub-style consistency tracker</p>
         </div>
-        <div className="flex gap-6 text-sm">
+        <div className="heatmap-summary flex flex-wrap gap-4 text-sm sm:gap-6">
           <div>
             <span className="text-2xl font-semibold text-accent">{streak.current}</span>
             <span className="ml-1.5 text-muted">day streak</span>
@@ -113,6 +113,17 @@ export function StreakHeatmap() {
                           });
                         }}
                         onMouseLeave={() => setTooltip(null)}
+                        onFocus={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltip({
+                            x: rect.left + rect.width / 2,
+                            y: rect.top,
+                            text: cell.count === 0
+                              ? `No activity on ${cell.date}`
+                              : `${cell.count} session${cell.count > 1 ? "s" : ""} · ${cell.minutes.toFixed(1)} min`,
+                          });
+                        }}
+                        onBlur={() => setTooltip(null)}
                       />
                     ) : (
                       <span key={`empty-${wi}-${di}`} className="heatmap-cell heatmap-empty" />

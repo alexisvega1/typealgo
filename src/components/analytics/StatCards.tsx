@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { aggregatePatternStats, fluencyScore } from "@/lib/metrics";
 import { getPatternPack } from "@/data/curriculum";
+import { deviceClassLabel } from "@/lib/device-class";
 import { useStatsStore } from "@/stores/stats-store";
 
 export function StatCards() {
@@ -112,13 +113,45 @@ export function RecentSessions() {
   return (
     <section className="card">
       <h2 className="card-title">Recent Sessions</h2>
-      <div className="mt-4 overflow-x-auto">
+
+      <div className="recent-sessions-cards mt-4 md:hidden">
+        {recent.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted">No sessions yet</p>
+        ) : (
+          recent.map((r) => (
+            <div key={r.id} className="recent-session-card">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium">{getPatternPack(r.pattern)?.name ?? r.pattern}</span>
+                <span className="text-xs text-muted capitalize">{r.difficulty}</span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-3 text-sm">
+                <span className="text-accent">{r.wpm} wpm</span>
+                <span>{r.accuracy}% acc</span>
+                {r.deviceClass && (
+                  <span className="text-xs text-muted">{deviceClassLabel(r.deviceClass)}</span>
+                )}
+              </div>
+              <div className="mt-1 text-xs text-muted">
+                {new Date(r.timestamp).toLocaleString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="mt-4 hidden overflow-x-auto md:block">
         <table className="sessions-table">
           <thead>
             <tr>
               <th>Pattern</th>
               <th>WPM</th>
               <th>Accuracy</th>
+              <th>Device</th>
               <th>Difficulty</th>
               <th>When</th>
             </tr>
@@ -126,7 +159,7 @@ export function RecentSessions() {
           <tbody>
             {recent.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-muted">
+                <td colSpan={6} className="py-8 text-center text-muted">
                   No sessions yet
                 </td>
               </tr>
@@ -136,6 +169,9 @@ export function RecentSessions() {
                   <td>{getPatternPack(r.pattern)?.name ?? r.pattern}</td>
                   <td className="text-accent">{r.wpm}</td>
                   <td>{r.accuracy}%</td>
+                  <td className="text-muted text-xs">
+                    {r.deviceClass ? deviceClassLabel(r.deviceClass) : "—"}
+                  </td>
                   <td className="capitalize">{r.difficulty}</td>
                   <td className="text-muted">
                     {new Date(r.timestamp).toLocaleString(undefined, {

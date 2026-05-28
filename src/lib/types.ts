@@ -252,6 +252,8 @@ export interface PatternPack {
   color: string;
 }
 
+export type DeviceClass = "desktop-keyboard" | "mobile-touch" | "tablet";
+
 export interface KeystrokeEvent {
   char: string;
   index: number;
@@ -310,6 +312,8 @@ export interface TypingResult {
   recallMode?: RecallMode;
   recallMetrics?: RecallMetrics;
   sprintMetrics?: SprintMetrics;
+  /** Input surface for analytics — desktop vs touch sessions */
+  deviceClass?: DeviceClass;
 }
 
 export interface DailyActivity {

@@ -6,7 +6,8 @@ import { analyzeSession, applySuggestedRecallMode } from "@/lib/coach";
 import { hesitationHotspots } from "@/lib/metrics";
 import { formatAnimatedStat, useAnimatedNumber } from "@/lib/use-animated-number";
 import type { CoachAnalysis } from "@/lib/coach/types";
-import type { Snippet, TypingResult } from "@/lib/types";
+import { deviceClassLabel, isTouchDeviceClass } from "@/lib/device-class";
+import type { DeviceClass, Snippet, TypingResult } from "@/lib/types";
 import { CoachSection, recommendedActionIsRetry } from "@/components/coach/CoachSection";
 import { SprintResultsSection } from "./SprintResultsSection";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -15,6 +16,7 @@ import { useStatsStore } from "@/stores/stats-store";
 interface ResultsPanelProps {
   result: TypingResult;
   snippet: Snippet;
+  deviceClass?: DeviceClass;
   onRetry: () => void;
   onNext: () => void;
 }
@@ -36,7 +38,7 @@ const item = {
   },
 };
 
-export function ResultsPanel({ result, snippet, onRetry, onNext }: ResultsPanelProps) {
+export function ResultsPanel({ result, snippet, deviceClass = "desktop-keyboard", onRetry, onNext }: ResultsPanelProps) {
   const hotspots = hesitationHotspots(result.keystrokes, snippet.code);
   const allResults = useStatsStore((s) => s.results);
   const settings = useSettingsStore();
@@ -61,6 +63,7 @@ export function ResultsPanel({ result, snippet, onRetry, onNext }: ResultsPanelP
   );
 
   const recommendRetry = recommendedActionIsRetry(coach.recommendation.action);
+  const touchSession = isTouchDeviceClass(deviceClass);
 
   const handleNext = () => {
     applySuggestedRecallMode(coach, setRecallMode, setTrainingMode);
@@ -93,14 +96,33 @@ export function ResultsPanel({ result, snippet, onRetry, onNext }: ResultsPanelP
           </motion.h2>
           <motion.p variants={item} className="mt-1 text-sm text-muted">
             {snippet.title}
+            {result.deviceClass && (
+              <span className="ml-2 text-xs uppercase tracking-wide opacity-70">
+                · {deviceClassLabel(result.deviceClass)}
+              </span>
+            )}
           </motion.p>
+
+          {touchSession && (
+            <motion.p variants={item} className="mobile-wpm-disclaimer mt-3">
+              Practice session on {deviceClassLabel(deviceClass)} — not comparable to desktop
+              keyboard benchmarking.
+            </motion.p>
+          )}
 
           <motion.div
             variants={item}
-            className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4"
+            className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
           >
-            <StatBlock label="WPM" value={result.wpm} highlight decimals={1} />
-            <StatBlock label="Raw WPM" value={result.rawWpm} decimals={1} />
+            <StatBlock
+              label={touchSession ? "Practice WPM" : "WPM"}
+              value={result.wpm}
+              highlight
+              decimals={1}
+            />
+            {!touchSession && (
+              <StatBlock label="Raw WPM" value={result.rawWpm} decimals={1} />
+            )}
             <StatBlock label="Accuracy" value={result.accuracy} suffix="%" decimals={1} />
             <StatBlock
               label="Time"
@@ -159,7 +181,7 @@ export function ResultsPanel({ result, snippet, onRetry, onNext }: ResultsPanelP
             </motion.div>
           )}
 
-          <motion.div variants={item} className="mt-8 flex gap-3">
+          <motion.div variants={item} className="results-actions mt-8 hidden gap-3 md:flex">
             <button
               type="button"
               className={`btn-primary flex-1${!recommendRetry ? " btn-recommended" : ""}`}
@@ -175,7 +197,7 @@ export function ResultsPanel({ result, snippet, onRetry, onNext }: ResultsPanelP
               Retry
             </button>
           </motion.div>
-          <motion.p variants={item} className="mt-3 text-center text-xs text-muted">
+          <motion.p variants={item} className="mt-3 hidden text-center text-xs text-muted md:block">
             Press <kbd className="kbd">Enter</kbd> or <kbd className="kbd">Shift+Tab</kbd> for next ·{" "}
             <kbd className="kbd">Esc</kbd> to retry
           </motion.p>

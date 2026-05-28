@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/layout/Header";
+import { MobileNav } from "@/components/layout/MobileNav";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
 
@@ -35,6 +36,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,7 +55,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AppProviders>
           <Header />
-          {children}
+          <div className="app-main flex flex-1 flex-col">{children}</div>
+          <MobileNav />
         </AppProviders>
       </body>
     </html>
