@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { TypeAlgoLogo } from "@/components/brand/TypeAlgoLogo";
 import { SaveProgressPrompt } from "@/components/sync/SaveProgressPrompt";
 import { SyncStatusIndicator } from "@/components/sync/SyncStatusIndicator";
 import { TrainingModeToggle } from "@/components/typing/TrainingModeToggle";
@@ -20,8 +21,8 @@ export function Header() {
   return (
     <header className="app-header sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
-          <span className="logo-mark">TA</span>
+        <Link href="/" className="logo-link flex shrink-0 items-center gap-2.5 group">
+          <TypeAlgoLogo size={34} className="logo-link-mark" />
           <span className="text-lg font-semibold tracking-tight">
             Type<span className="text-accent">Algo</span>
           </span>

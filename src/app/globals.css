@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./logo-typing-keyframes.css";
 
 :root {
   --background: #0a0a0c;
@@ -71,18 +72,261 @@ body {
   background: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
-.logo-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-  border-radius: 0.5rem;
-  background: linear-gradient(135deg, #e2b714 0%, #c9970c 100%);
-  color: #0d0d0f;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.logo-link {
+  transition: opacity 0.2s var(--cursor-ease);
+}
+
+.logo-link-mark {
+  transition:
+    transform 0.28s var(--cursor-ease),
+    filter 0.28s var(--cursor-ease);
+}
+
+.logo-link:hover .logo-link-mark {
+  transform: translateY(-1px) scale(1.03);
+  filter: drop-shadow(0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent));
+}
+
+/* ── TypeAlgo typewriter logo ── */
+.typealgo-logo {
+  display: block;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.typealgo-logo .logo-glow {
+  transition: opacity 0.35s var(--cursor-ease);
+}
+
+.typealgo-logo .logo-paper-orbit,
+.typealgo-logo .logo-paper-spin {
+  transform-box: fill-box;
+  transform-origin: 20px 10px;
+}
+
+.typealgo-logo .logo-paper-sheet {
+  filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.12));
+}
+
+.typealgo-logo .logo-sparkle {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.typealgo-logo .logo-slot-lip {
+  pointer-events: none;
+}
+
+.typealgo-logo .logo-cursor {
+  animation: logo-cursor-blink 1.15s step-end infinite;
+}
+
+.typealgo-logo:hover .logo-glow {
+  animation: logo-glow-pulse 2.35s ease-in-out infinite;
+}
+
+.typealgo-logo:hover .logo-cursor {
+  animation-duration: 0.45s;
+}
+
+.typealgo-logo .logo-key {
+  fill: #2a2a30;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  filter: drop-shadow(0 0 0 transparent);
+}
+
+.typealgo-logo:hover .logo-keyboard-well {
+  animation: logo-keyboard-glow 5.4s ease-in-out infinite;
+}
+
+/* Keys choreographed to: "i'm getting a job at google or openai." — see logo-typing-keyframes.css */
+.typealgo-logo:hover .logo-key-1 {
+  animation: logo-key-type-1 5.4s ease-out infinite;
+}
+
+.typealgo-logo:hover .logo-key-2 {
+  animation: logo-key-type-2 5.4s ease-out infinite;
+}
+
+.typealgo-logo:hover .logo-key-3 {
+  animation: logo-key-type-3 5.4s ease-out infinite;
+}
+
+.typealgo-logo:hover .logo-key-4 {
+  animation: logo-key-type-4 5.4s ease-out infinite;
+}
+
+.typealgo-logo:hover .logo-key-5 {
+  animation: logo-key-type-5 5.4s ease-out infinite;
+}
+
+/* Orbit + spin split for smooth lift → twirl → settle */
+.typealgo-logo:not(.typealgo-logo-static):hover .logo-paper-orbit {
+  animation: logo-paper-orbit 2.35s cubic-bezier(0.33, 0.82, 0.25, 1) infinite;
+  will-change: transform;
+}
+
+.typealgo-logo:not(.typealgo-logo-static):hover .logo-paper-spin {
+  animation: logo-paper-spin 2.35s cubic-bezier(0.45, 0.05, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.typealgo-logo:not(.typealgo-logo-static):hover .logo-paper-sheet {
+  animation: logo-paper-shimmer 2.35s ease-in-out infinite;
+}
+
+.typealgo-logo:not(.typealgo-logo-static):hover .logo-sparkle-1 {
+  animation: logo-sparkle-pop 2.35s ease-out infinite;
+}
+
+.typealgo-logo:not(.typealgo-logo-static):hover .logo-sparkle-2 {
+  animation: logo-sparkle-pop 2.35s ease-out infinite 0.05s;
+}
+
+.typealgo-logo:not(.typealgo-logo-static):hover .logo-sparkle-3 {
+  animation: logo-sparkle-pop 2.35s ease-out infinite 0.1s;
+}
+
+@keyframes logo-paper-orbit {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  16% {
+    transform: translate(0, -5px) scale(1.015);
+  }
+  22% {
+    transform: translate(0, -7px) scale(1.025);
+  }
+  50% {
+    transform: translate(8px, -12px) scale(1.07);
+  }
+  56% {
+    transform: translate(9px, -13px) scale(1.075);
+  }
+  62% {
+    transform: translate(9px, -13px) scale(1.07);
+  }
+  78% {
+    transform: translate(3px, -4px) scale(1.02);
+  }
+  90% {
+    transform: translate(0, -1px) scale(1.005);
+  }
+  96% {
+    transform: translate(0, 0.5px) scale(0.998);
+  }
+}
+
+@keyframes logo-paper-spin {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  18% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(300deg);
+  }
+  56% {
+    transform: rotate(360deg);
+  }
+  62% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes logo-paper-shimmer {
+  0%,
+  24%,
+  72%,
+  100% {
+    filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.12));
+  }
+  48%,
+  56% {
+    filter:
+      drop-shadow(0 0 5px rgba(226, 183, 20, 0.55))
+      drop-shadow(0 0 10px rgba(245, 213, 71, 0.28));
+  }
+}
+
+@keyframes logo-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  52% {
+    opacity: 0.48;
+  }
+}
+
+@keyframes logo-sparkle-pop {
+  0%,
+  38%,
+  66%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  48% {
+    opacity: 0.95;
+    transform: scale(1.35);
+  }
+  54% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  58% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@keyframes logo-cursor-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  46%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typealgo-logo .logo-cursor,
+  .typealgo-logo:hover .logo-paper-orbit,
+  .typealgo-logo:hover .logo-paper-spin,
+  .typealgo-logo:hover .logo-paper-sheet,
+  .typealgo-logo:hover .logo-sparkle,
+  .typealgo-logo:hover .logo-glow,
+  .typealgo-logo:hover .logo-key-1,
+  .typealgo-logo:hover .logo-key-2,
+  .typealgo-logo:hover .logo-key-3,
+  .typealgo-logo:hover .logo-key-4,
+  .typealgo-logo:hover .logo-key-5,
+  .typealgo-logo:hover .logo-keyboard-well {
+    animation: none !important;
+  }
+
+  .typealgo-logo:hover .logo-glow {
+    opacity: 0.2;
+  }
+
+  .typealgo-logo .logo-cursor {
+    opacity: 1;
+  }
+
+  .logo-link:hover .logo-link-mark {
+    transform: none;
+  }
 }
 
 .stat-value {
