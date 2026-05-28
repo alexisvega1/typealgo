@@ -6,6 +6,18 @@ const SUPABASE_CONFIGURED = Boolean(
 );
 
 export async function proxy(request: NextRequest) {
+  const url = request.nextUrl;
+
+  // Supabase sometimes drops the OAuth `code` on Site URL root when redirect_to
+  // isn't allow-listed (e.g. signing in from a *.vercel.app host). Forward it
+  // to our callback handler so the session exchange still runs.
+  const code = url.searchParams.get("code");
+  if (code && url.pathname !== "/auth/callback") {
+    const callback = url.clone();
+    callback.pathname = "/auth/callback";
+    return NextResponse.redirect(callback);
+  }
+
   if (!SUPABASE_CONFIGURED) {
     return NextResponse.next();
   }
