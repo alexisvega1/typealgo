@@ -78,7 +78,7 @@ export function Header() {
       <div className="relative mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="logo-link flex shrink-0 items-center gap-2.5 group">
           <TypeAlgoLogo size={34} className="logo-link-mark" />
-          <span className="text-lg font-semibold tracking-tight">
+          <span className="logo-wordmark text-lg font-semibold tracking-tight">
             Type<span className="text-accent">Algo</span>
           </span>
         </Link>

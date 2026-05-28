@@ -1161,7 +1161,7 @@ export function TypingTest() {
         )}
       </p>
       <MobileActionBar
-        visible={isMobileLayout}
+        visible={isMobileLayout && !finished}
         finished={finished}
         trainingMode={settings.trainingMode}
         reviewLine={reviewLine}
