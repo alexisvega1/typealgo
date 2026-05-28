@@ -1223,6 +1223,9 @@ body {
   color: var(--foreground);
   pointer-events: none;
   white-space: nowrap;
+  max-width: calc(100vw - 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hero-tagline {
@@ -1824,6 +1827,39 @@ body {
 @keyframes sync-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
+}
+
+.auth-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--red) 35%, var(--border));
+  background: color-mix(in srgb, var(--red) 8%, var(--surface-1));
+  color: var(--foreground);
+  font-size: 0.875rem;
+}
+
+.auth-error-banner-text {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.auth-error-banner-dismiss {
+  flex-shrink: 0;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-error-banner-dismiss:hover {
+  border-color: color-mix(in srgb, var(--foreground) 20%, var(--border));
 }
 
 .sync-avatar-btn {

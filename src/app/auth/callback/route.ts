@@ -8,13 +8,16 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await getSupabaseServerClient();
-    if (supabase) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-      if (error) {
-        return NextResponse.redirect(
-          `${origin}/?auth_error=${encodeURIComponent(error.message)}`,
-        );
-      }
+    if (!supabase) {
+      return NextResponse.redirect(
+        `${origin}/?auth_error=${encodeURIComponent("Cloud sync is not configured on this server.")}`,
+      );
+    }
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      return NextResponse.redirect(
+        `${origin}/?auth_error=${encodeURIComponent(error.message)}`,
+      );
     }
   }
 

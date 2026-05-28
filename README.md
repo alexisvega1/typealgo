@@ -75,6 +75,12 @@ cp .env.example .env.local
 # Add Supabase credentials — app works fully offline without them
 ```
 
+See **[docs/auth-audit.md](./docs/auth-audit.md)** for GitHub OAuth setup and login/signup audit checklist.
+
+```bash
+npm run audit:auth
+```
+
 ---
 
 ## Deploy

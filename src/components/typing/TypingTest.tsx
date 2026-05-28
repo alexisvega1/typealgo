@@ -33,6 +33,7 @@ import {
 import { resolveSprintProfile } from "@/lib/curriculum-engine";
 import { buildReviewAnalytics, computeSprintMetrics, linesForMotif } from "@/lib/modes";
 import { useDeviceClass, useIsMobileLayout } from "@/hooks/use-device-class";
+import { isTouchDeviceClass } from "@/lib/device-class";
 import type { DeviceClass, SyntaxMotif } from "@/lib/types";
 import { useSettingsStore } from "@/stores/settings-store";
 import { useStatsStore } from "@/stores/stats-store";
@@ -682,6 +683,13 @@ export function TypingTest() {
     }
   }, [isRecallActive]);
 
+  const dismissTypingKeyboard = useCallback(() => {
+    inputRef.current?.blur();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, []);
+
   const finishTest = useCallback(() => {
     if (finishedRef.current) return;
     const s = snippetRef.current;
@@ -739,8 +747,20 @@ export function TypingTest() {
     setResult(res);
     setFinished(true);
     recordResult(res);
-    requestAnimationFrame(() => inputRef.current?.focus());
-  }, [recordResult]);
+    if (isTouchDeviceClass(deviceClassRef.current)) {
+      dismissTypingKeyboard();
+      requestAnimationFrame(dismissTypingKeyboard);
+    } else {
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [recordResult, dismissTypingKeyboard]);
+
+  useEffect(() => {
+    if (!finished || !isMobileLayout) return;
+    dismissTypingKeyboard();
+    const timer = window.setTimeout(dismissTypingKeyboard, 50);
+    return () => window.clearTimeout(timer);
+  }, [finished, isMobileLayout, dismissTypingKeyboard]);
 
   const ensureStarted = useCallback((now: number) => {
     if (!startTimeRef.current) {
@@ -1020,7 +1040,12 @@ export function TypingTest() {
         companyTrack={settings.companyTrack}
         careerLevel={settings.careerLevel}
       />
-      <div className="typing-stage relative mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-6" onPointerDown={() => inputRef.current?.focus()}>
+      <div
+        className="typing-stage relative mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-6"
+        onPointerDown={() => {
+          if (!finished && typingEnabled) inputRef.current?.focus();
+        }}
+      >
         {typingEnabled && !isSprintMode && (
           <LiveStats
             wpm={liveWpm}
@@ -1072,7 +1097,7 @@ export function TypingTest() {
               <div
                 ref={containerRef}
                 className="code-display relative font-mono"
-                onClick={() => typingEnabled && inputRef.current?.focus()}
+                onClick={() => typingEnabled && !finished && inputRef.current?.focus()}
               >
                 <div ref={linesTransformRef} className="code-viewport-lines">
                   {codeLines.map((line, li) => (
@@ -1125,10 +1150,21 @@ export function TypingTest() {
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
-          inputMode={isReviewMode ? "none" : "text"}
-          tabIndex={typingEnabled || isReviewMode ? 0 : -1}
+          readOnly={finished && isMobileLayout}
+          inputMode={
+            finished && isMobileLayout ? "none" : isReviewMode ? "none" : "text"
+          }
+          tabIndex={
+            finished
+              ? isMobileLayout
+                ? -1
+                : 0
+              : typingEnabled || isReviewMode
+                ? 0
+                : -1
+          }
           aria-label={typingEnabled ? "Typing input" : "Typing paused in review mode"}
-          aria-disabled={!typingEnabled}
+          aria-disabled={!typingEnabled || (finished && isMobileLayout)}
           onKeyDown={handleKeyDown}
         />
       </div>

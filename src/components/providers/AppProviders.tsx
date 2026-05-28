@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import type { User } from "@supabase/supabase-js";
 import { migrateLegacyStorageKeys } from "@/lib/migrate-storage";
+import { AuthErrorBanner } from "@/components/sync/AuthErrorBanner";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { syncProgress } from "@/lib/sync/engine";
@@ -108,5 +109,12 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     };
   }, [markSynced, setStatus, setUser]);
 
-  return children;
+  return (
+    <>
+      <Suspense fallback={null}>
+        <AuthErrorBanner />
+      </Suspense>
+      {children}
+    </>
+  );
 }

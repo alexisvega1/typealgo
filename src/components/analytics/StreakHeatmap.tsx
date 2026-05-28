@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { buildHeatmap, parseLocalDate } from "@/lib/heatmap";
 import { useStatsStore } from "@/stores/stats-store";
 
@@ -14,15 +14,32 @@ const LEVEL_CLASS = [
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const TOOLTIP_EDGE_PADDING = 12;
+
+type TooltipState = {
+  anchorX: number;
+  y: number;
+  text: string;
+};
+
+function tooltipText(cell: {
+  date: string;
+  count: number;
+  minutes: number;
+  avgWpm: number;
+  isFuture: boolean;
+}): string {
+  if (cell.isFuture) return `${cell.date} (upcoming)`;
+  if (cell.count === 0) return `No activity on ${cell.date}`;
+  return `${cell.count} session${cell.count > 1 ? "s" : ""} · ${cell.minutes.toFixed(1)} min · ${cell.avgWpm} wpm avg`;
+}
 
 export function StreakHeatmap() {
   const dailyActivity = useStatsStore((s) => s.dailyActivity);
   const streak = useStatsStore((s) => s.streak);
-  const [tooltip, setTooltip] = useState<{
-    x: number;
-    y: number;
-    text: string;
-  } | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [tooltipX, setTooltipX] = useState(0);
 
   const { weeks, totalActive } = useMemo(
     () => buildHeatmap(dailyActivity),
@@ -43,6 +60,28 @@ export function StreakHeatmap() {
     });
     return labels;
   }, [weeks]);
+
+  useLayoutEffect(() => {
+    if (!tooltip || !tooltipRef.current) {
+      setTooltipX(0);
+      return;
+    }
+
+    const width = tooltipRef.current.offsetWidth;
+    const half = width / 2;
+    const minX = TOOLTIP_EDGE_PADDING + half;
+    const maxX = window.innerWidth - TOOLTIP_EDGE_PADDING - half;
+    setTooltipX(Math.max(minX, Math.min(maxX, tooltip.anchorX)));
+  }, [tooltip]);
+
+  const showTooltip = (target: HTMLElement, text: string) => {
+    const rect = target.getBoundingClientRect();
+    setTooltip({
+      anchorX: rect.left + rect.width / 2,
+      y: rect.top,
+      text,
+    });
+  };
 
   return (
     <section className="card">
@@ -100,29 +139,9 @@ export function StreakHeatmap() {
                         type="button"
                         className={`heatmap-cell ${LEVEL_CLASS[cell.level]}${cell.isFuture ? " heatmap-future" : ""}`}
                         aria-label={`${cell.date}: ${cell.count} sessions`}
-                        onMouseEnter={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setTooltip({
-                            x: rect.left + rect.width / 2,
-                            y: rect.top,
-                            text: cell.isFuture
-                              ? `${cell.date} (upcoming)`
-                              : cell.count === 0
-                                ? `No activity on ${cell.date}`
-                                : `${cell.count} session${cell.count > 1 ? "s" : ""} · ${cell.minutes.toFixed(1)} min · ${cell.avgWpm} wpm avg`,
-                          });
-                        }}
+                        onMouseEnter={(e) => showTooltip(e.currentTarget, tooltipText(cell))}
                         onMouseLeave={() => setTooltip(null)}
-                        onFocus={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setTooltip({
-                            x: rect.left + rect.width / 2,
-                            y: rect.top,
-                            text: cell.count === 0
-                              ? `No activity on ${cell.date}`
-                              : `${cell.count} session${cell.count > 1 ? "s" : ""} · ${cell.minutes.toFixed(1)} min`,
-                          });
-                        }}
+                        onFocus={(e) => showTooltip(e.currentTarget, tooltipText(cell))}
                         onBlur={() => setTooltip(null)}
                       />
                     ) : (
@@ -146,8 +165,9 @@ export function StreakHeatmap() {
 
       {tooltip && (
         <div
+          ref={tooltipRef}
           className="heatmap-tooltip"
-          style={{ left: tooltip.x, top: tooltip.y - 8 }}
+          style={{ left: tooltipX || tooltip.anchorX, top: tooltip.y - 8 }}
         >
           {tooltip.text}
         </div>
