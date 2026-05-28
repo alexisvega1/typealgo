@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { signOut } from "@/lib/sync/engine";
 import { useSyncStore } from "@/stores/sync-store";
 
@@ -11,7 +12,11 @@ const STATUS_LABEL: Record<string, string> = {
   offline: "Offline — local only",
 };
 
-export function SyncStatusIndicator() {
+interface SyncStatusIndicatorProps {
+  variant?: "header" | "menu";
+}
+
+export function SyncStatusIndicator({ variant = "header" }: SyncStatusIndicatorProps) {
   const status = useSyncStore((s) => s.status);
   const userId = useSyncStore((s) => s.userId);
   const userAvatar = useSyncStore((s) => s.userAvatar);
@@ -19,21 +24,29 @@ export function SyncStatusIndicator() {
 
   if (!userId) {
     return (
-      <span className="sync-status sync-status-local" title="Progress saved on this device">
+      <span
+        className={clsx(
+          "sync-status sync-status-local",
+          variant === "menu" && "sync-status-menu",
+        )}
+        title="Progress saved on this device"
+      >
         <span className="sync-dot" />
-        <span className="hidden sm:inline">Local</span>
+        <span className={variant === "header" ? "hidden sm:inline" : undefined}>Local</span>
       </span>
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={clsx("flex items-center gap-2", variant === "menu" && "sync-status-menu-row")}>
       <span
-        className={`sync-status sync-status-${status}`}
+        className={clsx(`sync-status sync-status-${status}`, variant === "menu" && "sync-status-menu")}
         title={error ?? STATUS_LABEL[status] ?? status}
       >
         <span className="sync-dot" />
-        <span className="hidden sm:inline">{STATUS_LABEL[status] ?? status}</span>
+        <span className={variant === "header" ? "hidden sm:inline" : undefined}>
+          {STATUS_LABEL[status] ?? status}
+        </span>
       </span>
       {userAvatar ? (
         <button
@@ -48,7 +61,7 @@ export function SyncStatusIndicator() {
       ) : (
         <button
           type="button"
-          className="sync-signout-btn"
+          className={clsx("sync-signout-btn", variant === "menu" && "sync-signout-btn-menu")}
           onClick={() => void signOut()}
         >
           Sign out

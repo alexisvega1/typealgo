@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { signInWithGitHub } from "@/lib/sync/engine";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { useStatsStore } from "@/stores/stats-store";
 import { useSyncStore } from "@/stores/sync-store";
 
-export function SaveProgressPrompt() {
+interface SaveProgressPromptProps {
+  variant?: "header" | "menu";
+  onOpen?: () => void;
+}
+
+export function SaveProgressPrompt({ variant = "header", onOpen }: SaveProgressPromptProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +39,11 @@ export function SaveProgressPrompt() {
     <>
       <button
         type="button"
-        className="save-progress-btn"
-        onClick={() => setOpen(true)}
+        className={clsx("save-progress-btn", variant === "menu" && "save-progress-btn-menu")}
+        onClick={() => {
+          onOpen?.();
+          setOpen(true);
+        }}
       >
         Save progress
       </button>

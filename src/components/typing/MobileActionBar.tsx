@@ -12,7 +12,6 @@ interface MobileActionBarProps {
   onNext?: () => void;
   onReviewLinePrev?: () => void;
   onReviewLineNext?: () => void;
-  onSetMode?: (mode: TrainingMode) => void;
 }
 
 export function MobileActionBar({
@@ -25,7 +24,6 @@ export function MobileActionBar({
   onNext,
   onReviewLinePrev,
   onReviewLineNext,
-  onSetMode,
 }: MobileActionBarProps) {
   if (!visible) return null;
 
@@ -64,49 +62,6 @@ export function MobileActionBar({
         >
           Line ↓
         </button>
-        {onSetMode && (
-          <button
-            type="button"
-            className="mobile-action-btn mobile-action-primary"
-            onClick={() => onSetMode("recall")}
-          >
-            Recall
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  if (onSetMode && (trainingMode === "type" || trainingMode === "recall")) {
-    return (
-      <div className="mobile-action-bar md:hidden" role="toolbar" aria-label="Mode shortcuts">
-        {trainingMode === "type" && (
-          <button
-            type="button"
-            className="mobile-action-btn mobile-action-secondary"
-            onClick={() => onSetMode("review")}
-          >
-            Review
-          </button>
-        )}
-        {trainingMode === "recall" && (
-          <button
-            type="button"
-            className="mobile-action-btn mobile-action-secondary"
-            onClick={() => onSetMode("review")}
-          >
-            Review
-          </button>
-        )}
-        {trainingMode === "type" && (
-          <button
-            type="button"
-            className="mobile-action-btn mobile-action-primary"
-            onClick={() => onSetMode("recall")}
-          >
-            Recall
-          </button>
-        )}
       </div>
     );
   }

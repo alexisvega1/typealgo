@@ -383,9 +383,57 @@ export function TypingTest() {
     }
   }, [applyReviewStyles]);
 
+  const rebuildBlankMaskForMode = useCallback(() => {
+    const s = snippetRef.current;
+    const tokens = tokensRef.current;
+    if (!s || tokens.length === 0) return;
+
+    trainingModeRef.current = settings.trainingMode;
+    recallModeRef.current = effectiveRecallMode(settings.trainingMode, settings.recallMode);
+
+    const results = useStatsStore.getState().results;
+    const prior = priorSnippetRecallStats(results, s.id);
+    const intensity = isSprintTraining(settings.trainingMode)
+      ? 1
+      : computeRecallIntensity({
+          fluencyLevel: s.fluencyLevel,
+          priorAccuracy: prior?.accuracy,
+          priorRecallAccuracy: prior?.recallAccuracy,
+        });
+
+    blankMaskRef.current = buildRecallPlan(
+      tokens,
+      s.code,
+      recallModeRef.current,
+      intensity,
+    ).blankMask;
+
+    if (deviceClassRef.current === "mobile-touch" && isRecallTraining(settings.trainingMode)) {
+      const mobileRecall =
+        recallModeRef.current === "skeleton" ? "skeleton" : "token-blank";
+      if (mobileRecall !== recallModeRef.current) {
+        recallModeRef.current = mobileRecall;
+        blankMaskRef.current = buildRecallPlan(
+          tokens,
+          s.code,
+          mobileRecall,
+          intensity,
+        ).blankMask;
+      }
+    }
+  }, [settings.trainingMode, settings.recallMode]);
+
   useEffect(() => {
+    rebuildBlankMaskForMode();
     resetDisplay();
-  }, [snippet, resetDisplay, tick]);
+  }, [
+    snippet,
+    resetDisplay,
+    tick,
+    settings.trainingMode,
+    activeRecallMode,
+    rebuildBlankMaskForMode,
+  ]);
 
   useEffect(() => {
     if (isReviewMode) applyReviewStyles();
@@ -926,6 +974,9 @@ export function TypingTest() {
                 duration: isReviewMode ? 0.35 : 0.28,
                 ease: [0.22, 1, 0.36, 1] as const,
               }}
+              onAnimationComplete={(definition) => {
+                if (definition !== "exit") resetDisplay();
+              }}
             >
               <div
                 ref={containerRef}
@@ -1029,7 +1080,6 @@ export function TypingTest() {
         onReviewLineNext={() =>
           setReviewLine((l) => Math.min(Math.max(0, codeLines.length - 1), l + 1))
         }
-        onSetMode={setTrainingMode}
       />
       <AnimatePresence>
         {finished && result && (

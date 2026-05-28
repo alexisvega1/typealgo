@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
@@ -17,10 +18,29 @@ const NAV = [
 export function Header() {
   const pathname = usePathname();
   const isTypingPage = pathname === "/";
+  const [menuState, setMenuState] = useState<{ path: string; open: boolean } | null>(null);
+  const menuOpen = menuState?.open === true && menuState.path === pathname;
+
+  const closeMenu = () => setMenuState(null);
+  const toggleMenu = () =>
+    setMenuState((current) =>
+      current?.open && current.path === pathname
+        ? null
+        : { path: pathname, open: true },
+    );
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMenu();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   return (
     <header className="app-header sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
+      <div className="relative mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="logo-link flex shrink-0 items-center gap-2.5 group">
           <TypeAlgoLogo size={34} className="logo-link-mark" />
           <span className="text-lg font-semibold tracking-tight">
@@ -34,24 +54,52 @@ export function Header() {
           </div>
         )}
 
-        <nav className="ml-auto flex items-center gap-1 sm:gap-2">
-          <SaveProgressPrompt />
-          <SyncStatusIndicator />
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={clsx(
-                "header-nav-link hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors md:inline-flex",
-                pathname === item.href
-                  ? "bg-surface-2 text-accent"
-                  : "text-muted hover:text-foreground",
-              )}
+        <div className="ml-auto flex shrink-0 items-center">
+          <button
+            type="button"
+            className="header-menu-btn"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="header-mobile-menu"
+            onClick={toggleMenu}
+          >
+            <span className={clsx("header-menu-icon", menuOpen && "header-menu-icon-open")} />
+          </button>
+        </div>
+
+        {menuOpen && (
+          <>
+            <button
+              type="button"
+              className="header-menu-backdrop"
+              aria-label="Close menu"
+              onClick={closeMenu}
+            />
+            <nav
+              id="header-mobile-menu"
+              className="header-mobile-menu"
+              aria-label="Primary navigation"
             >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+              {NAV.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={clsx(
+                    "header-mobile-menu-link",
+                    pathname === item.href && "header-mobile-menu-link-active",
+                  )}
+                  onClick={closeMenu}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <div className="header-mobile-menu-footer">
+                <SyncStatusIndicator variant="menu" />
+                <SaveProgressPrompt variant="menu" onOpen={closeMenu} />
+              </div>
+            </nav>
+          </>
+        )}
       </div>
 
       {isTypingPage && (
