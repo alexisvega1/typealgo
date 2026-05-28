@@ -1651,6 +1651,29 @@ body {
   cursor: not-allowed;
 }
 
+.save-progress-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.save-progress-secondary-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--surface-2) 80%, var(--foreground) 5%);
+}
+
+.save-progress-secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .sync-status {
   display: inline-flex;
   align-items: center;
@@ -1730,17 +1753,42 @@ body {
   }
 }
 
+.header-icon-btn,
 .header-menu-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  margin-left: 0.125rem;
   border-radius: 0.625rem;
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--foreground);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.header-icon-btn:hover,
+.header-menu-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.header-icon-btn-active,
+.header-menu-btn.header-icon-btn-active {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  color: var(--accent);
+}
+
+.filters-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  border: none;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .header-menu-icon,

@@ -1,31 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
-import { signInWithGitHub } from "@/lib/sync/engine";
+import {
+  downloadLocalProgressBackup,
+  signInWithGitHub,
+} from "@/lib/sync/engine";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { useStatsStore } from "@/stores/stats-store";
 import { useSyncStore } from "@/stores/sync-store";
 
 interface SaveProgressPromptProps {
   variant?: "header" | "menu";
-  onOpen?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** When false, only the dialog is rendered (trigger lives elsewhere). */
+  showTrigger?: boolean;
+  onTrigger?: () => void;
 }
 
-export function SaveProgressPrompt({ variant = "header", onOpen }: SaveProgressPromptProps) {
-  const [open, setOpen] = useState(false);
+export function useSaveProgressVisible(): boolean {
+  const totalSessions = useStatsStore((s) => s.totalSessions);
+  const userId = useSyncStore((s) => s.userId);
+  return !userId && totalSessions > 0;
+}
+
+export function SaveProgressPrompt({
+  variant = "header",
+  open,
+  onOpenChange,
+  showTrigger = true,
+  onTrigger,
+}: SaveProgressPromptProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const totalSessions = useStatsStore((s) => s.totalSessions);
   const userId = useSyncStore((s) => s.userId);
   const streak = useStatsStore((s) => s.streak);
+  const configured = isSupabaseConfigured();
+
+  const isControlled = open !== undefined;
+  const dialogOpen = isControlled ? open : internalOpen;
+
+  const setDialogOpen = useCallback(
+    (next: boolean) => {
+      if (isControlled) onOpenChange?.(next);
+      else setInternalOpen(next);
+      if (!next) {
+        setError(null);
+        setLoading(false);
+      }
+    },
+    [isControlled, onOpenChange],
+  );
 
   if (userId || totalSessions === 0) return null;
 
-  const configured = isSupabaseConfigured();
+  const openDialog = () => {
+    onTrigger?.();
+    setDialogOpen(true);
+  };
 
-  const handleSave = async () => {
+  const handleBackupDownload = () => {
+    downloadLocalProgressBackup();
+    setDialogOpen(false);
+  };
+
+  const handleCloudSave = async () => {
     setLoading(true);
     setError(null);
     const result = await signInWithGitHub();
@@ -35,85 +79,110 @@ export function SaveProgressPrompt({ variant = "header", onOpen }: SaveProgressP
     }
   };
 
-  return (
-    <>
-      <button
-        type="button"
-        className={clsx("save-progress-btn", variant === "menu" && "save-progress-btn-menu")}
-        onClick={() => {
-          onOpen?.();
-          setOpen(true);
-        }}
-      >
-        Save progress
-      </button>
-
-      <AnimatePresence>
-        {open && (
+  const dialog = (
+    <AnimatePresence>
+      {dialogOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="save-progress-overlay"
+          onClick={() => setDialogOpen(false)}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="save-progress-overlay"
-            onClick={() => setOpen(false)}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.22 }}
+            className="save-progress-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="save-progress-title"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.98 }}
-              transition={{ duration: 0.22 }}
-              className="save-progress-modal"
-              onClick={(e) => e.stopPropagation()}
-              role="dialog"
-              aria-labelledby="save-progress-title"
-            >
-              <h2 id="save-progress-title" className="text-lg font-semibold">
-                Save your progress
-              </h2>
-              <p className="mt-2 text-sm text-muted leading-relaxed">
-                Keep your streaks, mastery history, and training data across devices.
-                {streak.current > 0 && (
-                  <>
-                    {" "}
-                    Your <span className="text-accent">{streak.current}-day streak</span>{" "}
-                    is worth saving.
-                  </>
-                )}
-              </p>
+            <h2 id="save-progress-title" className="text-lg font-semibold">
+              Save your progress
+            </h2>
+            <p className="mt-2 text-sm text-muted leading-relaxed">
+              Keep your streaks, mastery history, and training data across devices.
+              {streak.current > 0 && (
+                <>
+                  {" "}
+                  Your <span className="text-accent">{streak.current}-day streak</span> is worth
+                  saving.
+                </>
+              )}
+            </p>
 
-              {!configured ? (
-                <p className="mt-4 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted">
-                  Cloud sync requires Supabase env vars. Local progress is already saved
-                  on this device.
-                </p>
-              ) : (
+            {configured ? (
+              <>
                 <button
                   type="button"
                   className="btn-github mt-5 w-full"
                   disabled={loading}
-                  onClick={handleSave}
+                  onClick={() => void handleCloudSave()}
                 >
                   <GitHubIcon />
                   {loading ? "Redirecting…" : "Continue with GitHub"}
                 </button>
-              )}
+                <button
+                  type="button"
+                  className="save-progress-secondary-btn mt-3 w-full"
+                  disabled={loading}
+                  onClick={handleBackupDownload}
+                >
+                  Download backup file
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="btn-github mt-5 w-full"
+                  onClick={handleBackupDownload}
+                >
+                  Download backup file
+                </button>
+                <p className="mt-4 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted leading-relaxed">
+                  Cloud sync across devices needs Supabase env vars on the host
+                  (<code className="text-foreground/80">NEXT_PUBLIC_SUPABASE_URL</code>,{" "}
+                  <code className="text-foreground/80">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>
+                  ). Your backup file can be restored later when sync is enabled.
+                </p>
+              </>
+            )}
 
-              {error && <p className="mt-3 text-xs text-red">{error}</p>}
+            {error && <p className="mt-3 text-xs text-red">{error}</p>}
 
-              <p className="mt-4 text-center text-xs text-muted">
-                No account wall — keep typing locally anytime.
-              </p>
-              <button
-                type="button"
-                className="mt-3 w-full text-center text-xs text-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Not now
-              </button>
-            </motion.div>
+            <p className="mt-4 text-center text-xs text-muted">
+              No account wall — keep typing locally anytime.
+            </p>
+            <button
+              type="button"
+              className="mt-3 w-full text-center text-xs text-muted hover:text-foreground"
+              onClick={() => setDialogOpen(false)}
+            >
+              Not now
+            </button>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      {showTrigger && (
+        <button
+          type="button"
+          className={clsx("save-progress-btn", variant === "menu" && "save-progress-btn-menu")}
+          onClick={openDialog}
+        >
+          Save progress
+        </button>
+      )}
+
+      {typeof document !== "undefined" ? createPortal(dialog, document.body) : null}
     </>
   );
 }

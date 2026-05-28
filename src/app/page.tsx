@@ -4,7 +4,9 @@ import { TypingTest } from "@/components/typing/TypingTest";
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col">
-      <SettingsBar />
+      <div id="typing-filters-panel">
+        <SettingsBar />
+      </div>
       <TypingTest />
     </main>
   );

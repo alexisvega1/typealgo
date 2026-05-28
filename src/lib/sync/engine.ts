@@ -112,6 +112,19 @@ export async function syncProgress(userId: string): Promise<{
   }
 }
 
+export function downloadLocalProgressBackup(): void {
+  const payload = getLocalSnapshot();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `typealgo-progress-${new Date().toISOString().slice(0, 10)}.json`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 export async function signInWithGitHub(): Promise<{ ok: boolean; error?: string }> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) {
