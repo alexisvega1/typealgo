@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   description:
     "Type something that matters. Procedural fluency training — implementation cognition, not problem dumps.",
   applicationName: "TypeAlgo",
+  verification: {
+    google: "xmmie2FJ9cmN_5hn5UteNcFhYfkdpCFcp2OOfM8ebxU",
+  },
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
