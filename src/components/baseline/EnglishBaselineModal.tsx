@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { generateEnglishWords } from "@/lib/english-baseline";
 import { calcAccuracy, calcRawWpm, calcWpm } from "@/lib/metrics";
@@ -39,6 +39,27 @@ function BaselineRunner({ onClose }: { onClose: () => void }) {
   const text = useMemo(() => words.join(" "), [words]);
   const chars = useMemo(() => Array.from(text), [text]);
 
+  // Group the flat char stream into words (+ the single space that follows each
+  // word) so the text wraps by word instead of scrolling horizontally.
+  const segments = useMemo(() => {
+    const segs: { chars: { ch: string; i: number }[]; space: number | null }[] = [];
+    let i = 0;
+    words.forEach((w, wi) => {
+      const wordChars: { ch: string; i: number }[] = [];
+      for (const ch of w) {
+        wordChars.push({ ch, i });
+        i++;
+      }
+      let space: number | null = null;
+      if (wi < words.length - 1) {
+        space = i;
+        i++;
+      }
+      segs.push({ chars: wordChars, space });
+    });
+    return segs;
+  }, [words]);
+
   const [phase, setPhase] = useState<Phase>("ready");
   const [idx, setIdx] = useState(0);
   const [states, setStates] = useState<CharState[]>(() => chars.map(() => "pending"));
@@ -47,6 +68,7 @@ function BaselineRunner({ onClose }: { onClose: () => void }) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const activeCharRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
   const startRef = useRef<number | null>(null);
   const correctRef = useRef(0);
   const incorrectRef = useRef(0);
@@ -170,7 +192,15 @@ function BaselineRunner({ onClose }: { onClose: () => void }) {
   }, []);
 
   useEffect(() => {
-    activeCharRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    const container = textRef.current;
+    const active = activeCharRef.current;
+    if (!container || !active) return;
+    // Center the active character vertically within the text box only (never the
+    // page), so you're always typing near the middle and can see the next lines.
+    const cRect = container.getBoundingClientRect();
+    const aRect = active.getBoundingClientRect();
+    const delta = aRect.top - cRect.top - (container.clientHeight / 2 - aRect.height / 2);
+    container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
   }, [idx]);
 
   const touch = isTouchDeviceClass(deviceClass);
@@ -224,24 +254,40 @@ function BaselineRunner({ onClose }: { onClose: () => void }) {
             </div>
 
             <div
+              ref={textRef}
               className="baseline-text"
               onMouseDown={() => inputRef.current?.focus()}
             >
-              {chars.map((ch, i) => {
-                const state = states[i];
-                const isActive = i === idx;
-                return (
-                  <span
-                    key={i}
-                    ref={isActive ? activeCharRef : undefined}
-                    className={`baseline-char baseline-char-${state}${
-                      isActive ? " baseline-char-active" : ""
-                    }`}
-                  >
-                    {ch === " " ? "\u00a0" : ch}
+              {segments.map((seg, si) => (
+                <Fragment key={si}>
+                  <span className="baseline-word">
+                    {seg.chars.map(({ ch, i }) => {
+                      const isActive = i === idx;
+                      return (
+                        <span
+                          key={i}
+                          ref={isActive ? activeCharRef : undefined}
+                          className={`baseline-char baseline-char-${states[i]}${
+                            isActive ? " baseline-char-active" : ""
+                          }`}
+                        >
+                          {ch}
+                        </span>
+                      );
+                    })}
                   </span>
-                );
-              })}
+                  {seg.space !== null && (
+                    <span
+                      ref={seg.space === idx ? activeCharRef : undefined}
+                      className={`baseline-char baseline-space baseline-char-${
+                        states[seg.space]
+                      }${seg.space === idx ? " baseline-char-active" : ""}`}
+                    >
+                      {" "}
+                    </span>
+                  )}
+                </Fragment>
+              ))}
             </div>
 
             <input

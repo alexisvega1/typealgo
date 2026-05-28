@@ -38,6 +38,7 @@ export function StreakHeatmap() {
   const dailyActivity = useStatsStore((s) => s.dailyActivity);
   const streak = useStatsStore((s) => s.streak);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const [tooltipX, setTooltipX] = useState(0);
 
@@ -45,6 +46,13 @@ export function StreakHeatmap() {
     () => buildHeatmap(dailyActivity),
     [dailyActivity],
   );
+
+  // Keep today (rightmost column) in view by default — when the card is narrow
+  // the grid overflows, and otherwise today would be scrolled off-screen.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [weeks]);
 
   const monthLabels = useMemo(() => {
     const labels: { label: string; week: number }[] = [];
@@ -106,7 +114,7 @@ export function StreakHeatmap() {
         </div>
       </div>
 
-      <div className="heatmap-wrap mt-6 overflow-x-auto">
+      <div ref={scrollRef} className="heatmap-wrap mt-6 overflow-x-auto">
         <div className="heatmap-grid min-w-[720px]">
           <div className="heatmap-day-labels">
             {DAYS.map((d, i) => (

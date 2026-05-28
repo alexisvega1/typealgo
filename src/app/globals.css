@@ -996,7 +996,7 @@ body {
 
 .baseline-text {
   margin-top: 1rem;
-  max-height: 9.5rem;
+  height: 8.25rem;
   overflow-y: auto;
   border-radius: 0.75rem;
   background: var(--surface-2);
@@ -1006,7 +1006,23 @@ body {
   line-height: 1.9;
   letter-spacing: 0.01em;
   cursor: text;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.baseline-text::-webkit-scrollbar {
+  display: none;
+}
+
+.baseline-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.baseline-space {
+  white-space: normal;
 }
 
 .baseline-char {
@@ -1054,7 +1070,7 @@ body {
   .baseline-text {
     font-size: 1.0625rem;
     line-height: 1.85;
-    max-height: 8rem;
+    height: 7rem;
   }
 
   .baseline-header {
@@ -1943,6 +1959,51 @@ body {
 .btn-github:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-oauth {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.btn-oauth:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-oauth.btn-google {
+  background: #ffffff;
+  color: #1f1f1f;
+  border-color: #dadce0;
+}
+
+.btn-oauth.btn-google:hover:not(:disabled) {
+  background: #f5f6f7;
+}
+
+.btn-oauth.btn-apple {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.btn-oauth.btn-apple:hover:not(:disabled) {
+  background: #1a1a1a;
 }
 
 .save-progress-secondary-btn {

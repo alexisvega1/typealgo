@@ -127,14 +127,18 @@ export function downloadLocalProgressBackup(): void {
   URL.revokeObjectURL(url);
 }
 
-export async function signInWithGitHub(): Promise<{ ok: boolean; error?: string }> {
+export type OAuthProvider = "github" | "google" | "apple";
+
+export async function signInWithProvider(
+  provider: OAuthProvider,
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) {
     return { ok: false, error: "Cloud sync is not configured yet." };
   }
 
   const { error } = await supabase.auth.signInWithOAuth({
-    provider: "github",
+    provider,
     options: {
       redirectTo: `${siteUrl()}/auth/callback`,
     },
@@ -142,6 +146,10 @@ export async function signInWithGitHub(): Promise<{ ok: boolean; error?: string 
 
   if (error) return { ok: false, error: error.message };
   return { ok: true };
+}
+
+export function signInWithGitHub(): Promise<{ ok: boolean; error?: string }> {
+  return signInWithProvider("github");
 }
 
 export async function signOut(): Promise<void> {
