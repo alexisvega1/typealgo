@@ -13,6 +13,8 @@ import {
 import { useStatsStore } from "@/stores/stats-store";
 import { ContentStrategyPanel } from "./ContentStrategyPanel";
 import { CareerTracksPanel } from "./CareerTracksPanel";
+import { LanguageStackPanel } from "./LanguageStackPanel";
+import { EvidenceCredibilityPanel } from "./EvidenceCredibilityPanel";
 import { useSettingsStore } from "@/stores/settings-store";
 
 export function CurriculumOverview() {
@@ -151,6 +153,14 @@ export function CurriculumOverview() {
           })}
         </div>
       </section>
+
+      <div className="mt-8">
+        <LanguageStackPanel />
+      </div>
+
+      <div className="mt-8">
+        <EvidenceCredibilityPanel />
+      </div>
 
       <div className="mt-8">
         <CareerTracksPanel />

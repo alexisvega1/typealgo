@@ -6,6 +6,7 @@ import {
   curriculumStats,
   snippetsByTier,
 } from "@/data/curriculum";
+import { implementedLanguages } from "@/lib/stacks";
 import { RECALL_INTENSITY_MODES } from "@/lib/training-mode";
 import { useSettingsStore } from "@/stores/settings-store";
 import { CareerTrackSelector } from "@/components/curriculum/CareerTrackSelector";
@@ -110,8 +111,11 @@ export function SettingsBar() {
             onChange={(e) => setLanguage(e.target.value as typeof language)}
             className="settings-select"
           >
-            <option value="python">Python</option>
-            <option value="javascript">JavaScript</option>
+            {implementedLanguages().map((lang) => (
+              <option key={lang.id} value={lang.id}>
+                {lang.name}
+              </option>
+            ))}
           </select>
         </label>
 
