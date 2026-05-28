@@ -265,6 +265,8 @@ export interface KeystrokeEvent {
   autoIndent?: boolean;
   /** Structural auto-flow (newline, indent) — excluded from WPM / recall scoring */
   autoStructural?: boolean;
+  /** Auto-skipped closing bracket/quote after typing the opener — excluded from WPM */
+  autoPair?: boolean;
 }
 
 export type RecallMode = "full-copy" | "token-blank" | "line-blank" | "skeleton";
@@ -355,6 +357,8 @@ export interface TypingSettings {
   companyTrack: CompanyTrackId;
   /** Levels.fyi-inspired procedural seniority ladder. */
   careerLevel: CareerLevelId;
+  /** Skip typing closing ), ], }, quotes when the snippet expects them next. */
+  autoPairCompletion: boolean;
 }
 
 /** Cognitive training profile — not "interview prep", implementation fluency. */

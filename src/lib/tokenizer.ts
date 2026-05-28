@@ -123,7 +123,7 @@ export function tokenizeCode(code: string, language: Language): CharToken[] {
       continue;
     }
 
-    if (ch === '"' || ch === "'") {
+    if (ch === '"' || ch === "'" || ch === "`") {
       const quote = ch;
       tokens.push({ char: ch, type: "string" });
       i++;

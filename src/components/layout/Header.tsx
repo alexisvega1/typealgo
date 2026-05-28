@@ -11,6 +11,7 @@ import {
 } from "@/components/sync/SaveProgressPrompt";
 import { SyncStatusIndicator } from "@/components/sync/SyncStatusIndicator";
 import { TrainingModeToggle } from "@/components/typing/TrainingModeToggle";
+import { useIsMobileLayout } from "@/hooks/use-device-class";
 import { useUIStore } from "@/stores/ui-store";
 
 const NAV = [
@@ -29,6 +30,7 @@ export function Header() {
   const toggleFilters = useUIStore((s) => s.toggleFilters);
   const setFiltersOpen = useUIStore((s) => s.setFiltersOpen);
   const menuOpen = menuState?.open === true && menuState.path === pathname;
+  const isMobileLayout = useIsMobileLayout();
 
   const closeMenu = () => setMenuState(null);
   const toggleMenu = () =>
@@ -81,7 +83,7 @@ export function Header() {
           </span>
         </Link>
 
-        {isTypingPage && (
+        {isTypingPage && !isMobileLayout && (
           <div className="header-mode-toggle hidden min-w-0 flex-1 md:flex">
             <TrainingModeToggle />
           </div>
@@ -139,6 +141,14 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
+
+              {isTypingPage && isMobileLayout && (
+                <div className="header-mobile-menu-section">
+                  <span className="header-mobile-menu-label">Training mode</span>
+                  <TrainingModeToggle variant="menu" onSelect={closeMenu} />
+                </div>
+              )}
+
               <div className="header-mobile-menu-footer">
                 <SyncStatusIndicator variant="menu" />
                 {saveProgressVisible && (
@@ -155,12 +165,6 @@ export function Header() {
           </>
         )}
       </div>
-
-      {isTypingPage && (
-        <div className="header-mode-toggle-mobile border-t border-border/40 px-4 py-2 md:hidden">
-          <TrainingModeToggle />
-        </div>
-      )}
     </header>
   );
 }

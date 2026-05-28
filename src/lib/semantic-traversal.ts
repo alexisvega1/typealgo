@@ -35,5 +35,5 @@ export function countCognitiveChars(tokens: CharToken[]): number {
 }
 
 export function isAutoKeystroke(ks: KeystrokeEvent): boolean {
-  return Boolean(ks.autoStructural ?? ks.autoIndent);
+  return Boolean(ks.autoStructural ?? ks.autoIndent ?? ks.autoPair);
 }

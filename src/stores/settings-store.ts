@@ -19,6 +19,7 @@ interface SettingsState extends TypingSettings {
   setTestDuration: (sec: number) => void;
   setCompanyTrack: (track: TypingSettings["companyTrack"]) => void;
   setCareerLevel: (level: TypingSettings["careerLevel"]) => void;
+  setAutoPairCompletion: (on: boolean) => void;
   hydrateFromCloud: (settings: TypingSettings) => void;
 }
 
@@ -35,6 +36,7 @@ export const useSettingsStore = create<SettingsState>()(
       testDurationSec: 0,
       companyTrack: "general",
       careerLevel: "mid",
+      autoPairCompletion: false,
       setPatternPack: (patternPack) => set({ patternPack }),
       setDifficulty: (difficulty) => set({ difficulty }),
       setLanguage: (language) => set({ language }),
@@ -45,12 +47,13 @@ export const useSettingsStore = create<SettingsState>()(
       setTestDuration: (testDurationSec) => set({ testDurationSec }),
       setCompanyTrack: (companyTrack) => set({ companyTrack }),
       setCareerLevel: (careerLevel) => set({ careerLevel }),
+      setAutoPairCompletion: (autoPairCompletion) => set({ autoPairCompletion }),
       hydrateFromCloud: (settings) => set({ ...settings }),
     }),
     {
       name: "typealgo-settings",
       storage: createJSONStorage(() => safeLocalStorage),
-      version: 3,
+      version: 4,
       migrate: (state) => {
         const s = (state ?? {}) as TypingSettings;
         if (!s.trainingMode) {
@@ -65,6 +68,7 @@ export const useSettingsStore = create<SettingsState>()(
         if (s.adaptiveMode === undefined) s.adaptiveMode = true;
         if (!s.recallMode) s.recallMode = "token-blank";
         if (s.testDurationSec === undefined) s.testDurationSec = 0;
+        if (s.autoPairCompletion === undefined) s.autoPairCompletion = false;
         return s;
       },
     },

@@ -25,12 +25,14 @@ export function SettingsBar() {
     adaptiveMode,
     trainingMode,
     recallMode,
+    autoPairCompletion,
     setPatternPack,
     setDifficulty,
     setLanguage,
     setCurriculumTier,
     setAdaptiveMode,
     setRecallMode,
+    setAutoPairCompletion,
   } = useSettingsStore();
 
   const stats = curriculumStats();
@@ -141,6 +143,20 @@ export function SettingsBar() {
               />
               <span className="settings-label mb-0">Adaptive</span>
             </label>
+
+            <label className="settings-field adaptive-toggle settings-field-wide">
+              <input
+                type="checkbox"
+                checked={autoPairCompletion}
+                onChange={(e) => setAutoPairCompletion(e.target.checked)}
+                className="adaptive-checkbox"
+              />
+              <span className="settings-label mb-0">Auto-close pairs</span>
+            </label>
+            <p className="settings-field-hint settings-field-wide">
+              Skip closing ), ], {"{"}
+              {"}"}, &lt;&gt;, quotes, and backticks when the snippet expects them next.
+            </p>
           </div>
         </div>
       </div>

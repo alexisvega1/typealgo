@@ -9,7 +9,9 @@ import {
   type KeyboardEvent,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import clsx from "clsx";
 import { pickSnippet } from "@/data/curriculum";
+import { shouldAutoCompletePair } from "@/lib/auto-pair";
 import { tokenizeCode } from "@/lib/tokenizer";
 import { calcAccuracy, calcRawWpm, calcWpm } from "@/lib/metrics";
 import { buildRecallPlan, computeRecallIntensity } from "@/lib/recall-blanks";
@@ -38,7 +40,6 @@ import type { CharToken, KeystrokeEvent, Snippet, TypingResult } from "@/lib/typ
 import { ProblemHeader } from "./ProblemHeader";
 import { LiveStats } from "./LiveStats";
 import { MobileActionBar } from "./MobileActionBar";
-import { MobileSessionBanner } from "./MobileSessionBanner";
 import { RecallConfidence } from "./RecallConfidence";
 import { ResultsPanel } from "./ResultsPanel";
 import { ReviewWorkspace } from "./ReviewWorkspace";
@@ -97,6 +98,7 @@ export function TypingTest() {
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const linesTransformRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -517,10 +519,54 @@ export function TypingTest() {
     }
   }, []);
 
+  const focusActiveLine = useCallback(
+    (lineIndex: number) => {
+      const line = lineRefs.current[lineIndex];
+      const viewport = viewportRef.current;
+      const linesLayer = linesTransformRef.current;
+      if (!line || !viewport || !linesLayer) return;
+
+      if (isReviewMode) {
+        scrollActiveLineIntoView(lineIndex);
+        return;
+      }
+
+      const viewportHeight = viewport.clientHeight;
+      const lineTop = line.offsetTop;
+      const lineHeight = line.offsetHeight;
+      const displayHeight = linesLayer.offsetHeight;
+      const totalLines = lineRefs.current.length;
+      const topPad = 14;
+      const bottomPad = 12;
+
+      const isFirstLine = lineIndex === 0;
+      const isLastLine = lineIndex >= totalLines - 1;
+
+      let translateY: number;
+      if (isLastLine) {
+        translateY = viewportHeight - bottomPad - lineTop - lineHeight;
+      } else if (isFirstLine) {
+        translateY = topPad - lineTop;
+      } else {
+        translateY = viewportHeight / 2 - lineTop - lineHeight / 2;
+      }
+
+      const lineMinY = topPad - lineTop;
+      const lineMaxY = viewportHeight - bottomPad - lineTop - lineHeight;
+      translateY = Math.max(lineMinY, Math.min(lineMaxY, translateY));
+
+      const contentMinY = Math.min(0, viewportHeight - displayHeight);
+      translateY = Math.max(contentMinY, Math.min(0, translateY));
+
+      linesLayer.style.transform = `translate3d(0, ${Math.round(translateY)}px, 0)`;
+    },
+    [isReviewMode, scrollActiveLineIntoView],
+  );
+
   useEffect(() => {
     if (!isReviewMode) return;
-    scrollActiveLineIntoView(reviewLine);
-  }, [isReviewMode, reviewLine, scrollActiveLineIntoView]);
+    focusActiveLine(reviewLine);
+  }, [isReviewMode, reviewLine, focusActiveLine]);
 
   const updateActiveLine = useCallback(
     (idx: number) => {
@@ -532,10 +578,10 @@ export function TypingTest() {
         }
         lineRefs.current[line]?.classList.add("code-line-active");
         activeLineRef.current = line;
-        scrollActiveLineIntoView(line);
+        focusActiveLine(line);
       }
     },
-    [scrollActiveLineIntoView],
+    [focusActiveLine],
   );
 
   const updateCursor = useCallback(
@@ -550,9 +596,18 @@ export function TypingTest() {
         cursor.style.transform = `translate3d(${rect.left - containerRect.left}px, ${rect.top - containerRect.top}px, 0)`;
         cursor.style.width = `${Math.max(rect.width, 2.5)}px`;
         cursor.style.height = `${rect.height}px`;
+
+        if (!isReviewMode && lineRefs.current.length > 0) {
+          const map = charLineMapRef.current;
+          const lineIdx =
+            idx < map.length ? map[idx] : Math.max(0, lineRefs.current.length - 1);
+          if (lineIdx >= lineRefs.current.length - 1) {
+            focusActiveLine(lineIdx);
+          }
+        }
       });
     },
-    [findCursorTarget, updateActiveLine],
+    [findCursorTarget, updateActiveLine, isReviewMode, focusActiveLine],
   );
 
   const autoAdvanceStructural = useCallback(
@@ -595,7 +650,14 @@ export function TypingTest() {
       lineRefs.current[0].classList.add("code-line-active");
       activeLineRef.current = 0;
     }
-  }, [snippet, tick, updateCursor, isReviewMode, autoAdvanceStructural]);
+    if (linesTransformRef.current) {
+      linesTransformRef.current.style.transform = "";
+    }
+    if (viewportRef.current) {
+      viewportRef.current.scrollTop = 0;
+    }
+    requestAnimationFrame(() => focusActiveLine(0));
+  }, [snippet, tick, updateCursor, isReviewMode, autoAdvanceStructural, focusActiveLine]);
 
   const refreshStats = useCallback(() => {
     if (!startTimeRef.current) return;
@@ -707,6 +769,39 @@ export function TypingTest() {
     refreshStats();
   }, [refreshStats]);
 
+  const advanceAutoPair = useCallback(
+    (openChar: string, now: number) => {
+      if (!settings.autoPairCompletion) return;
+
+      const tokens = tokensRef.current;
+      const idx = indexRef.current;
+      if (idx >= tokens.length) return;
+
+      const nextExpected = tokens[idx].char;
+      if (!shouldAutoCompletePair(openChar, nextExpected)) return;
+
+      const wasBlank = blankMaskRef.current[idx];
+      keystrokesRef.current.push({
+        char: nextExpected,
+        index: idx,
+        correct: true,
+        timestamp: now,
+        delayMs: 0,
+        wasBlank,
+        autoPair: true,
+      });
+      if (wasBlank) blankCorrectRef.current++;
+
+      const el = charRefs.current[idx];
+      if (el) {
+        applyCharTyped(el, idx, tokens, true, blankMaskRef.current);
+        flashChar(el, true);
+      }
+      indexRef.current = idx + 1;
+    },
+    [settings.autoPairCompletion],
+  );
+
   const typeChar = useCallback(
     (char: string, now: number): boolean => {
       const tokens = tokensRef.current;
@@ -743,6 +838,7 @@ export function TypingTest() {
       setShowRevealHint(false);
 
       if (correct) {
+        advanceAutoPair(char, now);
         autoAdvanceStructural(now);
       } else {
         updateCursor(idx + 1);
@@ -752,7 +848,7 @@ export function TypingTest() {
       if (indexRef.current >= tokens.length) finishTest();
       return true;
     },
-    [finishTest, refreshStats, updateCursor, autoAdvanceStructural],
+    [finishTest, refreshStats, updateCursor, autoAdvanceStructural, advanceAutoPair],
   );
 
   const handleKeyDown = useCallback(
@@ -912,7 +1008,7 @@ export function TypingTest() {
       id="typing-stage-panel"
       role="tabpanel"
       aria-labelledby={`training-mode-${settings.trainingMode}`}
-      className={`flex flex-1 flex-col training-atmosphere-${settings.trainingMode}${isMobileLayout ? " typing-mobile" : ""}`}
+      className={`flex min-h-0 flex-1 flex-col training-atmosphere-${settings.trainingMode}${isMobileLayout ? " typing-mobile" : ""}`}
     >
       <ProblemHeader
         snippet={snippet}
@@ -923,16 +1019,7 @@ export function TypingTest() {
         companyTrack={settings.companyTrack}
         careerLevel={settings.careerLevel}
       />
-      <MobileSessionBanner
-        deviceClass={deviceClass}
-        trainingMode={settings.trainingMode}
-        onSwitchToRecall={() => {
-          setTrainingMode("recall");
-          setRecallMode("token-blank");
-        }}
-        onSwitchToReview={() => setTrainingMode("review")}
-      />
-      <div className="typing-stage relative mx-auto w-full max-w-4xl flex-1 px-4 py-4 sm:px-6 sm:py-6" onPointerDown={() => inputRef.current?.focus()}>
+      <div className="typing-stage relative mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-6" onPointerDown={() => inputRef.current?.focus()}>
         {typingEnabled && !isSprintMode && (
           <LiveStats
             wpm={liveWpm}
@@ -963,7 +1050,10 @@ export function TypingTest() {
           visible={(isRecallActive || isSprintMode) && started && sprintPhase === "active"}
           showRevealHint={showRevealHint && !isSprintMode}
         />
-        <div ref={viewportRef} className="code-viewport mt-6">
+        <div
+          ref={viewportRef}
+          className={clsx("code-viewport mt-6", !isReviewMode && "code-viewport-typing")}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={`${snippet.id}-${settings.trainingMode}-${activeRecallMode}`}
@@ -983,31 +1073,33 @@ export function TypingTest() {
                 className="code-display relative font-mono"
                 onClick={() => typingEnabled && inputRef.current?.focus()}
               >
-                {codeLines.map((line, li) => (
-                  <div
-                    key={li}
-                    ref={(el) => {
-                      lineRefs.current[li] = el;
-                    }}
-                    className="code-line flex"
-                  >
-                    <span className="line-num select-none">{li + 1}</span>
-                    <span className="line-content">
-                      {line.tokens.map((tok, ti) => {
-                        const globalIndex = line.startIndex + ti;
-                        return (
-                          <span
-                            key={globalIndex}
-                            ref={(el) => {
-                              charRefs.current[globalIndex] = el;
-                            }}
-                            className="code-char char-pending"
-                          />
-                        );
-                      })}
-                    </span>
-                  </div>
-                ))}
+                <div ref={linesTransformRef} className="code-viewport-lines">
+                  {codeLines.map((line, li) => (
+                    <div
+                      key={li}
+                      ref={(el) => {
+                        lineRefs.current[li] = el;
+                      }}
+                      className="code-line flex"
+                    >
+                      <span className="line-num select-none">{li + 1}</span>
+                      <span className="line-content">
+                        {line.tokens.map((tok, ti) => {
+                          const globalIndex = line.startIndex + ti;
+                          return (
+                            <span
+                              key={globalIndex}
+                              ref={(el) => {
+                                charRefs.current[globalIndex] = el;
+                              }}
+                              className="code-char char-pending"
+                            />
+                          );
+                        })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
                 <span ref={cursorRef} className="typing-cursor" aria-hidden />
               </div>
             </motion.div>
@@ -1038,36 +1130,36 @@ export function TypingTest() {
           aria-disabled={!typingEnabled}
           onKeyDown={handleKeyDown}
         />
-        <p className="mt-6 hidden text-center text-sm text-muted typing-hints md:block">
-          {isReviewMode ? (
-            <>
-              <kbd className="kbd">↑</kbd>/<kbd className="kbd">↓</kbd> lines ·{" "}
-              <kbd className="kbd">[</kbd>/<kbd className="kbd">]</kbd> motifs ·{" "}
-              <kbd className="kbd">Shift+Tab</kbd> next · <kbd className="kbd">Esc</kbd> restart
-            </>
-          ) : isSprintMode ? (
-            <>
-              {sprintPhase === "idle" && "Press any key to start · "}
-              {sprintPhase === "active" && (
-                <>
-                  No reveals · <kbd className="kbd">Shift+Tab</kbd> next ·{" "}
-                </>
-              )}
-              <kbd className="kbd">Esc</kbd> restart
-            </>
-          ) : (
-            <>
-              Lines flow automatically · <kbd className="kbd">Shift+Tab</kbd> next ·{" "}
-              {isRecallActive && (
-                <>
-                  <kbd className="kbd">?</kbd> reveal ·{" "}
-                </>
-              )}
-              <kbd className="kbd">Esc</kbd> restart
-            </>
-          )}
-        </p>
       </div>
+      <p className="typing-hints-footer hidden shrink-0 md:block">
+        {isReviewMode ? (
+          <>
+            <kbd className="kbd">↑</kbd>/<kbd className="kbd">↓</kbd> lines ·{" "}
+            <kbd className="kbd">[</kbd>/<kbd className="kbd">]</kbd> motifs ·{" "}
+            <kbd className="kbd">Shift+Tab</kbd> next · <kbd className="kbd">Esc</kbd> restart
+          </>
+        ) : isSprintMode ? (
+          <>
+            {sprintPhase === "idle" && "Press any key to start · "}
+            {sprintPhase === "active" && (
+              <>
+                No reveals · <kbd className="kbd">Shift+Tab</kbd> next ·{" "}
+              </>
+            )}
+            <kbd className="kbd">Esc</kbd> restart
+          </>
+        ) : (
+          <>
+            Lines flow automatically · <kbd className="kbd">Shift+Tab</kbd> next ·{" "}
+            {isRecallActive && (
+              <>
+                <kbd className="kbd">?</kbd> reveal ·{" "}
+              </>
+            )}
+            <kbd className="kbd">Esc</kbd> restart
+          </>
+        )}
+      </p>
       <MobileActionBar
         visible={isMobileLayout}
         finished={finished}

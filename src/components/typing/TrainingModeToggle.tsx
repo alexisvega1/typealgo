@@ -6,7 +6,12 @@ import { TRAINING_MODES } from "@/lib/training-mode";
 import type { TrainingMode } from "@/lib/types";
 import { useSettingsStore } from "@/stores/settings-store";
 
-export function TrainingModeToggle() {
+interface TrainingModeToggleProps {
+  variant?: "segment" | "menu";
+  onSelect?: () => void;
+}
+
+export function TrainingModeToggle({ variant = "segment", onSelect }: TrainingModeToggleProps) {
   const trainingMode = useSettingsStore((s) => s.trainingMode);
   const setTrainingMode = useSettingsStore((s) => s.setTrainingMode);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -20,9 +25,10 @@ export function TrainingModeToggle() {
       const entry = TRAINING_MODES.find((m) => m.id === mode);
       if (!entry?.available) return;
       setTrainingMode(mode);
-      focusTab(index);
+      if (variant === "segment") focusTab(index);
+      onSelect?.();
     },
-    [setTrainingMode, focusTab],
+    [setTrainingMode, focusTab, variant, onSelect],
   );
 
   const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
@@ -48,9 +54,11 @@ export function TrainingModeToggle() {
     }
   };
 
+  const isMenu = variant === "menu";
+
   return (
     <div
-      className="mode-segment"
+      className={clsx(isMenu ? "mode-segment-menu" : "mode-segment")}
       role="tablist"
       aria-label="Training mode"
     >
@@ -66,7 +74,7 @@ export function TrainingModeToggle() {
             }}
             type="button"
             role="tab"
-            id={`training-mode-${mode.id}`}
+            id={isMenu ? `training-mode-menu-${mode.id}` : `training-mode-${mode.id}`}
             aria-selected={active}
             aria-controls="typing-stage-panel"
             aria-disabled={disabled}
@@ -74,8 +82,8 @@ export function TrainingModeToggle() {
             title={mode.description}
             tabIndex={active ? 0 : -1}
             className={clsx(
-              "mode-segment-btn",
-              active && "mode-segment-btn-active",
+              isMenu ? "mode-segment-menu-btn" : "mode-segment-btn",
+              active && (isMenu ? "mode-segment-menu-btn-active" : "mode-segment-btn-active"),
               disabled && "mode-segment-btn-disabled",
             )}
             onClick={() => selectMode(mode.id, index)}

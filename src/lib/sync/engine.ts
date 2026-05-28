@@ -31,6 +31,7 @@ function pickSettings(state: ReturnType<typeof useSettingsStore.getState>): Typi
     testDurationSec: state.testDurationSec,
     companyTrack: state.companyTrack,
     careerLevel: state.careerLevel,
+    autoPairCompletion: state.autoPairCompletion,
   };
 }
 
