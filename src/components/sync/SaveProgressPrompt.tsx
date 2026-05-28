@@ -39,6 +39,7 @@ export function SaveProgressPrompt({
   const [internalOpen, setInternalOpen] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [agreed, setAgreed] = useState(false);
   const loading = loadingProvider !== null;
   const totalSessions = useStatsStore((s) => s.totalSessions);
   const userId = useSyncStore((s) => s.userId);
@@ -55,6 +56,7 @@ export function SaveProgressPrompt({
       if (!next) {
         setError(null);
         setLoadingProvider(null);
+        setAgreed(false);
       }
     },
     [isControlled, onOpenChange],
@@ -73,6 +75,7 @@ export function SaveProgressPrompt({
   };
 
   const handleCloudSave = async (provider: OAuthProvider) => {
+    if (!agreed) return;
     setLoadingProvider(provider);
     setError(null);
     // Apple prefers the native popup (Face ID / Touch ID) and resolves in-page;
@@ -124,11 +127,29 @@ export function SaveProgressPrompt({
 
             {configured ? (
               <>
-                <div className="mt-5 flex flex-col gap-2.5">
+                <label className="save-progress-agree mt-5">
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                  />
+                  <span>
+                    I agree to the{" "}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer">
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer">
+                      Privacy Policy
+                    </a>
+                    .
+                  </span>
+                </label>
+                <div className="mt-3 flex flex-col gap-2.5">
                   <button
                     type="button"
                     className="btn-oauth btn-github w-full"
-                    disabled={loading}
+                    disabled={loading || !agreed}
                     onClick={() => void handleCloudSave("github")}
                   >
                     <GitHubIcon />
@@ -137,7 +158,7 @@ export function SaveProgressPrompt({
                   <button
                     type="button"
                     className="btn-oauth btn-google w-full"
-                    disabled={loading}
+                    disabled={loading || !agreed}
                     onClick={() => void handleCloudSave("google")}
                   >
                     <GoogleIcon />
@@ -146,7 +167,7 @@ export function SaveProgressPrompt({
                   <button
                     type="button"
                     className="btn-oauth btn-apple w-full"
-                    disabled={loading}
+                    disabled={loading || !agreed}
                     onClick={() => void handleCloudSave("apple")}
                   >
                     <AppleIcon />

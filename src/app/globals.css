@@ -2617,3 +2617,99 @@ body {
     display: flex;
   }
 }
+
+/* Legal documents (privacy policy, terms of service) */
+.legal-doc {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.legal-doc h1 {
+  color: var(--foreground);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.legal-doc h2 {
+  color: var(--foreground);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.legal-doc h3 {
+  color: var(--foreground);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.legal-doc p {
+  margin-bottom: 0.85rem;
+}
+
+.legal-doc .legal-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+}
+
+.legal-doc ul {
+  list-style: disc;
+  padding-left: 1.4rem;
+  margin-bottom: 0.85rem;
+}
+
+.legal-doc li {
+  margin-bottom: 0.35rem;
+}
+
+.legal-doc strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.legal-doc a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal-doc a:hover {
+  opacity: 0.85;
+}
+
+.save-progress-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.save-progress-agree input[type="checkbox"] {
+  margin-top: 0.15rem;
+  width: 0.95rem;
+  height: 0.95rem;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.save-progress-agree a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.save-progress-agree a:hover {
+  opacity: 0.85;
+}
