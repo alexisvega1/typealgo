@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   downloadLocalProgressBackup,
+  signInWithApple,
   signInWithProvider,
   type OAuthProvider,
 } from "@/lib/sync/engine";
@@ -74,9 +75,14 @@ export function SaveProgressPrompt({
   const handleCloudSave = async (provider: OAuthProvider) => {
     setLoadingProvider(provider);
     setError(null);
-    const result = await signInWithProvider(provider);
+    // Apple prefers the native popup (Face ID / Touch ID) and resolves in-page;
+    // the others redirect away. Either way, only surface an actual error.
+    const result =
+      provider === "apple"
+        ? await signInWithApple()
+        : await signInWithProvider(provider);
     if (!result.ok) {
-      setError(result.error ?? "Could not start sign-in");
+      if (result.error) setError(result.error);
       setLoadingProvider(null);
     }
   };

@@ -152,6 +152,22 @@ export function signInWithGitHub(): Promise<{ ok: boolean; error?: string }> {
   return signInWithProvider("github");
 }
 
+/**
+ * Apple sign-in that prefers the native popup (Face ID / Touch ID on Apple
+ * devices) and transparently falls back to the OAuth redirect when the popup
+ * flow can't run — e.g. on localhost/http, when the Services ID isn't
+ * configured, or if the popup is blocked.
+ */
+export async function signInWithApple(): Promise<{ ok: boolean; error?: string }> {
+  const { signInWithAppleNative } = await import("@/lib/sync/apple-signin");
+  const native = await signInWithAppleNative();
+  if (native.ok) return { ok: true };
+  if (native.error) return { ok: false, error: native.error };
+  if (native.fellBack) return signInWithProvider("apple");
+  // User cancelled the popup — no error, nothing to redirect to.
+  return { ok: false };
+}
+
 export async function signOut(): Promise<void> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return;

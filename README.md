@@ -75,6 +75,17 @@ cp .env.example .env.local
 # Add Supabase credentials — app works fully offline without them
 ```
 
+For the native **Face ID / Touch ID** Apple popup (instead of the OAuth redirect
+page), also set the Apple Services ID — the web client id, not the App ID:
+
+```bash
+NEXT_PUBLIC_APPLE_SERVICES_ID=app.vercel.typealgo.web
+```
+
+It only activates on an HTTPS, non-localhost origin whose `…/auth/callback` is
+registered in the Services ID's Return URLs; otherwise Apple sign-in falls back
+to the standard redirect flow automatically.
+
 See **[docs/auth-audit.md](./docs/auth-audit.md)** for GitHub OAuth setup and login/signup audit checklist.
 
 ```bash
