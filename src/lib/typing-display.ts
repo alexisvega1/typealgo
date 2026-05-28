@@ -27,6 +27,7 @@ export function applyCharPending(
   revealed: Set<number>,
 ): void {
   const tok = tokens[index];
+  if (!tok) return;
   const isBlank = blankMask[index];
   const isRevealed = revealed.has(index);
   const isPast = index < typedIndex;
@@ -53,6 +54,7 @@ export function applyCharTyped(
   blankMask: boolean[],
 ): void {
   const tok = tokens[index];
+  if (!tok) return;
   el.textContent = tok.char === " " ? "\u00a0" : tok.char;
   const blankClass = blankMask[index] ? " char-was-blank" : "";
   el.className = `code-char ${tokenClass(tok.type)} ${correct ? "char-correct" : "char-incorrect"}${blankClass}`;
@@ -65,7 +67,7 @@ export function resetAllChars(
   revealed: Set<number>,
 ): void {
   charRefs.forEach((el, i) => {
-    if (!el) return;
+    if (!el || !tokens[i]) return;
     applyCharPending(el, i, tokens, 0, blankMask, revealed);
   });
 }
@@ -79,7 +81,7 @@ export function showAllCharsReview(
   charRefs.forEach((el, i) => {
     if (!el) return;
     const tok = tokens[i];
-    if (tok.char === "\n") return;
+    if (!tok || tok.char === "\n") return;
     el.textContent = tok.char === " " ? "\u00a0" : tok.char;
 
     const classes = [`code-char`, tokenClass(tok.type), "char-review-visible"];

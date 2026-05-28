@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { TypeAlgoLogo } from "@/components/brand/TypeAlgoLogo";
+import { EnglishBaselineModal } from "@/components/baseline/EnglishBaselineModal";
 import {
   SaveProgressPrompt,
   useSaveProgressVisible,
@@ -25,6 +26,7 @@ export function Header() {
   const isTypingPage = pathname === "/";
   const [menuState, setMenuState] = useState<{ path: string; open: boolean } | null>(null);
   const [saveProgressOpen, setSaveProgressOpen] = useState(false);
+  const [baselineOpen, setBaselineOpen] = useState(false);
   const saveProgressVisible = useSaveProgressVisible();
   const filtersOpen = useUIStore((s) => s.filtersOpen);
   const toggleFilters = useUIStore((s) => s.toggleFilters);
@@ -57,6 +59,11 @@ export function Header() {
     setSaveProgressOpen(true);
   };
 
+  const openBaseline = () => {
+    closeMenu();
+    setBaselineOpen(true);
+  };
+
   const handleToggleMenu = () => {
     if (!menuOpen) setFiltersOpen(false);
     toggleMenu();
@@ -74,6 +81,7 @@ export function Header() {
         onOpenChange={setSaveProgressOpen}
         showTrigger={false}
       />
+      <EnglishBaselineModal open={baselineOpen} onClose={() => setBaselineOpen(false)} />
 
       <div className="relative mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="logo-link flex shrink-0 items-center gap-2.5 group">
@@ -148,6 +156,17 @@ export function Header() {
                   <TrainingModeToggle variant="menu" onSelect={closeMenu} />
                 </div>
               )}
+
+              <div className="header-menu-tools">
+                <span className="header-mobile-menu-label">Baseline</span>
+                <button
+                  type="button"
+                  className="header-mobile-menu-link header-mobile-menu-action"
+                  onClick={openBaseline}
+                >
+                  English baseline · 30s
+                </button>
+              </div>
 
               <div className="header-mobile-menu-footer">
                 <SyncStatusIndicator variant="menu" />

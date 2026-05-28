@@ -8,6 +8,7 @@ import { safeLocalStorage } from "@/lib/safe-storage";
 migrateLegacyStorageKeys();
 import { computeStreak, localDateKey } from "@/lib/heatmap";
 import type {
+  BaselineResult,
   DailyActivity,
   Pattern,
   TypingResult,
@@ -16,6 +17,7 @@ import type {
 
 interface StatsState extends UserStats {
   recordResult: (result: TypingResult) => void;
+  recordBaseline: (baseline: BaselineResult) => void;
   clearStats: () => void;
   hydrateFromCloud: (stats: UserStats) => void;
 }
@@ -26,6 +28,7 @@ const emptyStats: UserStats = {
   streak: { current: 0, longest: 0, lastActive: null },
   totalMinutes: 0,
   totalSessions: 0,
+  englishBaselines: [],
 };
 
 function dateKey(): string {
@@ -85,8 +88,13 @@ export const useStatsStore = create<StatsState>()(
           totalSessions: get().totalSessions + 1,
         });
       },
+      recordBaseline: (baseline) => {
+        const englishBaselines = [...(get().englishBaselines ?? []), baseline].slice(-200);
+        set({ englishBaselines });
+      },
       clearStats: () => set(emptyStats),
-      hydrateFromCloud: (stats) => set({ ...stats }),
+      hydrateFromCloud: (stats) =>
+        set({ ...stats, englishBaselines: stats.englishBaselines ?? [] }),
     }),
     {
       name: "typealgo-stats",

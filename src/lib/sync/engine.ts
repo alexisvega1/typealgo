@@ -44,6 +44,7 @@ export function getLocalSnapshot(): CloudProgressPayload {
     streak: statsState.streak,
     totalMinutes: statsState.totalMinutes,
     totalSessions: statsState.totalSessions,
+    englishBaselines: statsState.englishBaselines ?? [],
   };
   return buildPayload(stats, settings);
 }

@@ -1,5 +1,24 @@
 import { computeStreak } from "@/lib/heatmap";
-import type { DailyActivity, Pattern, TypingResult, TypingSettings, UserStats } from "@/lib/types";
+import type {
+  BaselineResult,
+  DailyActivity,
+  Pattern,
+  TypingResult,
+  TypingSettings,
+  UserStats,
+} from "@/lib/types";
+
+function mergeBaselines(local: BaselineResult[], remote: BaselineResult[]): BaselineResult[] {
+  const map = new Map<string, BaselineResult>();
+  for (const b of remote) map.set(b.id, b);
+  for (const b of local) {
+    const existing = map.get(b.id);
+    if (!existing || b.timestamp >= existing.timestamp) map.set(b.id, b);
+  }
+  return Array.from(map.values())
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .slice(-200);
+}
 
 function mergeResults(local: TypingResult[], remote: TypingResult[]): TypingResult[] {
   const map = new Map<string, TypingResult>();
@@ -65,6 +84,10 @@ export function mergeUserStats(local: UserStats, remote: UserStats): UserStats {
   const totalSessions = results.length;
   const totalMinutes =
     Math.round(results.reduce((sum, r) => sum + r.durationMs / 60000, 0) * 10) / 10;
+  const englishBaselines = mergeBaselines(
+    local.englishBaselines ?? [],
+    remote.englishBaselines ?? [],
+  );
 
   return {
     results,
@@ -72,6 +95,7 @@ export function mergeUserStats(local: UserStats, remote: UserStats): UserStats {
     streak,
     totalMinutes,
     totalSessions,
+    englishBaselines,
   };
 }
 

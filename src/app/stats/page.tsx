@@ -3,6 +3,7 @@ import {
   RecentSessions,
   StatCards,
 } from "@/components/analytics/StatCards";
+import { BaselineComparison } from "@/components/analytics/BaselineComparison";
 import { SkillRadar } from "@/components/analytics/SkillRadar";
 import { StreakHeatmap } from "@/components/analytics/StreakHeatmap";
 import { WpmChart } from "@/components/analytics/WpmChart";
@@ -38,6 +39,10 @@ export default function StatsPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <PatternBreakdown />
         <RecentSessions />
+      </div>
+
+      <div className="mt-6">
+        <BaselineComparison />
       </div>
     </main>
   );

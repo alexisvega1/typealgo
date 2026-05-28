@@ -19,6 +19,7 @@ interface ResultsPanelProps {
   deviceClass?: DeviceClass;
   onRetry: () => void;
   onNext: () => void;
+  onDismiss?: () => void;
 }
 
 const stagger = {
@@ -38,7 +39,7 @@ const item = {
   },
 };
 
-export function ResultsPanel({ result, snippet, deviceClass = "desktop-keyboard", onRetry, onNext }: ResultsPanelProps) {
+export function ResultsPanel({ result, snippet, deviceClass = "desktop-keyboard", onRetry, onNext, onDismiss }: ResultsPanelProps) {
   const hotspots = hesitationHotspots(result.keystrokes, snippet.code);
   const allResults = useStatsStore((s) => s.results);
   const settings = useSettingsStore();
@@ -90,6 +91,24 @@ export function ResultsPanel({ result, snippet, deviceClass = "desktop-keyboard"
         transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
         className="results-card results-card-complete"
       >
+        {onDismiss && (
+          <button
+            type="button"
+            className="results-close-btn"
+            onClick={onDismiss}
+            aria-label="Close summary and review the completed problem"
+            title="Close summary"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M4 4l8 8M12 4l-8 8"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        )}
         <div className="results-card-body">
           <motion.div variants={stagger} initial="hidden" animate="show">
             <motion.h2 variants={item} className="text-xl font-semibold text-accent">

@@ -82,6 +82,7 @@ export function TypingTest() {
 
   const [snippet, setSnippet] = useState<Snippet | null>(null);
   const [finished, setFinished] = useState(false);
+  const [resultsDismissed, setResultsDismissed] = useState(false);
   const [liveWpm, setLiveWpm] = useState(0);
   const [liveAcc, setLiveAcc] = useState(100);
   const [liveRecallAcc, setLiveRecallAcc] = useState(100);
@@ -104,6 +105,7 @@ export function TypingTest() {
   const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
   const cursorRef = useRef<HTMLSpanElement>(null);
+  const lineOffsetRef = useRef(0);
 
   const tokensRef = useRef<CharToken[]>([]);
   const blankMaskRef = useRef<boolean[]>([]);
@@ -187,6 +189,7 @@ export function TypingTest() {
       setSnippet(next);
       setFinished(false);
       finishedRef.current = false;
+      setResultsDismissed(false);
       setResult(null);
       setStarted(false);
       setLiveWpm(0);
@@ -560,7 +563,9 @@ export function TypingTest() {
       const contentMaxY = isFirstLine ? Math.max(0, topPad - lineTop) : 0;
       translateY = Math.max(contentMinY, Math.min(contentMaxY, translateY));
 
-      linesLayer.style.transform = `translate3d(0, ${Math.round(translateY)}px, 0)`;
+      const rounded = Math.round(translateY);
+      lineOffsetRef.current = rounded;
+      linesLayer.style.transform = `translate3d(0, ${rounded}px, 0)`;
     },
     [isReviewMode, scrollActiveLineIntoView],
   );
@@ -593,12 +598,9 @@ export function TypingTest() {
         const cursor = cursorRef.current;
         const target = findCursorTarget(idx);
         if (!cursor || !target || !containerRef.current) return;
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const rect = target.getBoundingClientRect();
-        cursor.style.transform = `translate3d(${rect.left - containerRect.left}px, ${rect.top - containerRect.top}px, 0)`;
-        cursor.style.width = `${Math.max(rect.width, 2.5)}px`;
-        cursor.style.height = `${rect.height}px`;
 
+        // Keep the trailing/last line pinned before measuring, so lineOffsetRef holds
+        // the line's final translateY when we place the caret.
         if (!isReviewMode && lineRefs.current.length > 0) {
           const map = charLineMapRef.current;
           const lineIdx =
@@ -607,6 +609,17 @@ export function TypingTest() {
             focusActiveLine(lineIdx);
           }
         }
+
+        // Use static layout offsets (relative to the positioned container) plus the
+        // lines layer's final translateY. getBoundingClientRect() would capture the
+        // mid-flight value of the 100ms scroll transition and strand the caret
+        // between lines; offsets are unaffected by transforms, so the caret lands on
+        // the target character's resting position.
+        const offsetX = target.offsetLeft;
+        const offsetY = target.offsetTop + lineOffsetRef.current;
+        cursor.style.transform = `translate3d(${offsetX}px, ${offsetY}px, 0)`;
+        cursor.style.width = `${Math.max(target.offsetWidth, 2.5)}px`;
+        cursor.style.height = `${target.offsetHeight}px`;
       });
     },
     [findCursorTarget, updateActiveLine, isReviewMode, focusActiveLine],
@@ -658,7 +671,12 @@ export function TypingTest() {
     if (viewportRef.current) {
       viewportRef.current.scrollTop = 0;
     }
-    requestAnimationFrame(() => focusActiveLine(0));
+    requestAnimationFrame(() => {
+      focusActiveLine(0);
+      // Reposition the caret after the first-line offset transform is applied,
+      // otherwise it lands ~topPad px above the first character.
+      updateCursor(indexRef.current);
+    });
   }, [snippet, tick, updateCursor, isReviewMode, autoAdvanceStructural, focusActiveLine]);
 
   const refreshStats = useCallback(() => {
@@ -1211,16 +1229,26 @@ export function TypingTest() {
         }
       />
       <AnimatePresence>
-        {finished && result && (
+        {finished && result && !resultsDismissed && (
           <ResultsPanel
             result={result}
             snippet={snippet}
             deviceClass={deviceClass}
             onRetry={handleMobileRetry}
             onNext={handleMobileNext}
+            onDismiss={() => setResultsDismissed(true)}
           />
         )}
       </AnimatePresence>
+      {finished && result && resultsDismissed && (
+        <button
+          type="button"
+          className="results-reopen-btn"
+          onClick={() => setResultsDismissed(false)}
+        >
+          View results
+        </button>
+      )}
     </div>
   );
 }

@@ -318,6 +318,26 @@ export interface TypingResult {
   deviceClass?: DeviceClass;
 }
 
+/**
+ * Standard-English typing baseline (MonkeyType-style). Uses the same WPM engine
+ * as code sessions, but every character (including spaces) is user-typed, so it
+ * serves as a control to contextualize "cognitive WPM" on code.
+ */
+export interface BaselineResult {
+  id: string;
+  wpm: number;
+  rawWpm: number;
+  accuracy: number;
+  durationMs: number;
+  correctChars: number;
+  incorrectChars: number;
+  totalChars: number;
+  /** Seconds the timed test ran (e.g. 30). */
+  durationSec: number;
+  timestamp: number;
+  deviceClass?: DeviceClass;
+}
+
 export interface DailyActivity {
   date: string;
   sessions: number;
@@ -342,6 +362,8 @@ export interface UserStats {
   streak: { current: number; longest: number; lastActive: string | null };
   totalMinutes: number;
   totalSessions: number;
+  /** Standard-English baseline runs — kept separate from algorithmic results. */
+  englishBaselines?: BaselineResult[];
 }
 
 export interface TypingSettings {

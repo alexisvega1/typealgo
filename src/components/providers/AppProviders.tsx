@@ -69,17 +69,22 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(userMeta(session.user));
-        void runSync(session.user.id);
+        const userId = session.user.id;
+        setTimeout(() => void runSync(userId), 0);
       }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Never await Supabase data calls inside this callback: supabase-js holds an
+      // internal auth lock while it runs, and any query that needs the access token
+      // would deadlock. Defer the sync to a fresh task so the lock is released first.
       if (session?.user) {
         setUser(userMeta(session.user));
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-          await runSync(session.user.id);
+          const userId = session.user.id;
+          setTimeout(() => void runSync(userId), 0);
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null);
