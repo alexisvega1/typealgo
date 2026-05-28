@@ -1,4 +1,5 @@
 import { getSnippet, resurfacingWeight } from "@/data/curriculum";
+import { evidenceCompanyWeight, evidenceLevelWeight } from "@/lib/evidence";
 import type {
   CareerLevelId,
   CompanyTrackId,
@@ -84,11 +85,16 @@ export function curriculumSnippetWeight(
   const patternW = weightForPattern(snippet.pattern, profile.track.patternWeights);
   const diffW = weightForDifficulty(snippet.difficulty, profile.track.difficultyBias);
 
+  const evidenceCo = evidenceCompanyWeight(snippet, trackId);
+  const evidenceLv = evidenceLevelWeight(snippet, levelId);
+  const priorBlend = motifW * patternW * diffW;
+  const evidenceBlend = 0.55 + evidenceCo * 0.9;
+  const levelBlend = 0.65 + evidenceLv * 0.7;
+
   return (
     base *
-    motifW *
-    patternW *
-    diffW *
+    (priorBlend * 0.5 + evidenceBlend * 0.5) *
+    levelBlend *
     levelFluencyFit(snippet, profile.level) *
     levelDifficultyFit(snippet, profile.level)
   );

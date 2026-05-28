@@ -14,12 +14,16 @@ const DEFAULT_SPRINT: SprintGradingProfile = {
   },
 };
 
+const TRACK_EVIDENCE_BASE =
+  "Probabilistic weighting from public prep motifs — not a claim about what any company asks.";
+
 export const COMPANY_TRACKS: CompanyTrack[] = [
   {
     id: "general",
     name: "General Fluency",
     tagline: "Balanced procedural training across all patterns",
-    marketingLabel: "Company-specific implementation fluency",
+    marketingLabel: "Universal interview prep motifs",
+    evidenceDisclaimer: TRACK_EVIDENCE_BASE,
     cognitiveProfile: "Breadth-first syntax fluency without company bias",
     status: "active",
     languages: ["python", "javascript", "java", "cpp"],
@@ -37,9 +41,11 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   },
   {
     id: "meta",
-    name: "Meta Fluency",
-    tagline: "Speed + graphs + implementation tempo",
-    marketingLabel: "Meta-style implementation fluency",
+    name: "Meta-oriented fluency",
+    tagline: "Graph-heavy, speed-oriented motifs common in public prep",
+    marketingLabel: "Common graph-heavy interview prep emphasis",
+    evidenceDisclaimer:
+      "Weights motifs frequently tagged in public Meta-style prep discussions — not Meta interview content.",
     cognitiveProfile: "High-speed graph traversal, queue/stack reflexes, execution under pressure",
     status: "active",
     languages: ["python"],
@@ -75,7 +81,7 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
       },
     },
     coaching: {
-      sprintEmphasis: "Meta optimizes for speed under graph pressure — Sprint-heavy",
+      sprintEmphasis: "Graph-heavy, speed-oriented motifs common in public prep — Sprint-heavy",
       weaknessFraming: "Slow boundary on graph syntax — one tempo rep",
       strengthFraming: "Clean tempo — push a harder graph motif",
       nextStepPrefix: "Speed drill",
@@ -83,9 +89,11 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   },
   {
     id: "google",
-    name: "Google Fluency",
-    tagline: "Breadth + correctness + edge-case handling",
-    marketingLabel: "Google-style implementation fluency",
+    name: "Google-oriented fluency",
+    tagline: "Breadth + correctness motifs common in public prep",
+    marketingLabel: "Common breadth-oriented interview prep emphasis",
+    evidenceDisclaimer:
+      "Weights motifs associated with breadth/correctness in public Google-style prep — not Google interview content.",
     cognitiveProfile: "Broad algorithm coverage, readable implementation, edge-case discipline",
     status: "active",
     languages: ["python"],
@@ -130,9 +138,11 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   },
   {
     id: "openai",
-    name: "OpenAI Fluency",
-    tagline: "Systems + ML + backend Python",
-    marketingLabel: "OpenAI-style implementation fluency",
+    name: "OpenAI-oriented fluency",
+    tagline: "ML/backend motifs common in public infra prep",
+    marketingLabel: "Common ML/backend-oriented prep emphasis",
+    evidenceDisclaimer:
+      "Weights Python backend + ML infra motifs from public prep literature — not OpenAI interview content.",
     cognitiveProfile: "Python backend fluency, async patterns, tensor ops, systems motifs",
     status: "active",
     languages: ["python"],
@@ -174,9 +184,11 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   },
   {
     id: "anthropic",
-    name: "Anthropic Fluency",
-    tagline: "Python + backend + ML infra + clarity",
-    marketingLabel: "Anthropic-style implementation fluency",
+    name: "Anthropic-oriented fluency",
+    tagline: "Python backend + ML infra motifs in public prep",
+    marketingLabel: "Common backend + ML infra prep emphasis",
+    evidenceDisclaimer:
+      "Weights motifs common in publicly discussed backend/ML infra prep — not Anthropic interview content.",
     cognitiveProfile: "Readable Python, backend systems, ML infra, reasoning clarity",
     status: "active",
     languages: ["python"],
@@ -218,9 +230,11 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   },
   {
     id: "deepmind",
-    name: "DeepMind Fluency",
-    tagline: "Algorithms + ML + scientific computing",
-    marketingLabel: "DeepMind-style implementation fluency",
+    name: "DeepMind-oriented fluency",
+    tagline: "Algorithm + research motifs common in public prep",
+    marketingLabel: "Common research-engineering prep emphasis",
+    evidenceDisclaimer:
+      "Weights algorithm + scientific computing motifs from public research-engineering prep — not DeepMind interview content.",
     cognitiveProfile: "Algorithm breadth, tensor reasoning, optimization, scientific Python",
     status: "active",
     languages: ["python"],
@@ -264,9 +278,11 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   },
   {
     id: "jane-street",
-    name: "Jane Street Fluency",
-    tagline: "Probability + optimization + precision",
-    marketingLabel: "Quant-style implementation fluency",
+    name: "Quant-oriented fluency",
+    tagline: "Probability + precision motifs in public quant prep",
+    marketingLabel: "Common quant/math prep emphasis",
+    evidenceDisclaimer:
+      "Weights math/precision motifs from public quant prep discussions — not Jane Street interview content.",
     cognitiveProfile: "Mathematical reasoning, combinatorics, tight implementation precision",
     status: "planned",
     languages: ["python"],

@@ -1,4 +1,37 @@
-export type Language = "python" | "javascript" | "java" | "cpp";
+/** Languages with live snippet curriculum today. */
+export type ImplementedLanguage = "python" | "javascript" | "java" | "cpp";
+
+/**
+ * Full technical ecosystem registry.
+ * Tier 1/2/3 languages — not all have snippets yet; see stacks registry.
+ */
+export type LanguageId =
+  | ImplementedLanguage
+  | "typescript"
+  | "go"
+  | "sql"
+  | "rust"
+  | "ocaml"
+  | "kotlin"
+  | "swift"
+  | "scala"
+  | "bash"
+  | "cuda"
+  | "r";
+
+/** Snippet language — implemented curricula only. */
+export type Language = ImplementedLanguage;
+
+export type LanguageTier = "tier-1" | "tier-2" | "tier-3";
+
+export type FrameworkId =
+  | "numpy"
+  | "pandas"
+  | "pytorch"
+  | "jax"
+  | "tensorflow";
+
+export type DomainFluencyId = "ml-systems" | "backend-infra" | "data-engineering" | "algorithms";
 export type Difficulty = "easy" | "medium" | "hard";
 export type Pattern =
   | "arrays"
@@ -88,6 +121,60 @@ export interface Snippet {
   variantOf?: string;
   /** Content packs this snippet belongs to (e.g. blind-75-track). */
   packIds?: string[];
+  /** Evidence-weighted associations — computed or curated override. */
+  evidence?: SnippetEvidenceProfile;
+}
+
+export type EvidenceConfidence = "low" | "medium" | "high";
+
+export type EvidenceSourceKind =
+  | "leetcode-discuss-aggregate"
+  | "blind-75-canonical"
+  | "neetcode-pattern"
+  | "github-repo-aggregate"
+  | "reddit-interview-aggregate"
+  | "levels-fyi-expectations"
+  | "motif-prior"
+  | "pattern-sophistication"
+  | "manual-curation";
+
+/** Reference to a public signal — aggregate counts only, never scraped text. */
+export interface EvidenceSourceRef {
+  kind: EvidenceSourceKind;
+  label: string;
+  mentionCount?: number;
+  recencyWeight?: number;
+  /** Optional public reference URL (discuss thread category, repo README, etc.) */
+  referenceUrl?: string;
+}
+
+export interface SophisticationScores {
+  /** Algorithmic pattern complexity (0–1). */
+  pattern: number;
+  /** Systems / infra implementation complexity (0–1). */
+  systems: number;
+  /** Speed-under-pressure expectation (0–1). */
+  implementationPressure: number;
+}
+
+/**
+ * Multidimensional evidence profile for a snippet.
+ * Weights are probabilistic associations — NOT claims about company interview content.
+ */
+export interface SnippetEvidenceProfile {
+  companyWeights: Partial<Record<CompanyTrackId, number>>;
+  levelWeights: Partial<Record<CareerLevelId, number>>;
+  sophistication: SophisticationScores;
+  /** How universally this motif appears across interview prep (0–1). */
+  universalScore: number;
+  confidenceScore: number;
+  confidenceBand: EvidenceConfidence;
+  evidenceSources: EvidenceSourceRef[];
+  motifJustification: string;
+  popularityScore: number;
+  recencyScore: number;
+  /** Human-readable positioning — never "Company X asks this". */
+  positioningLabels: string[];
 }
 
 /** How a snippet relates to external inspiration — derived, not cloned. */
@@ -305,7 +392,9 @@ export interface CompanyTrack {
   name: string;
   tagline: string;
   cognitiveProfile: string;
+  /** Probabilistic positioning — never implies company endorsement. */
   marketingLabel: string;
+  evidenceDisclaimer: string;
   status: CompanyTrackStatus;
   languages: Language[];
   motifWeights: Partial<Record<SyntaxMotif, number>>;

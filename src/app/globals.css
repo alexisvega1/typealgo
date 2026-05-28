@@ -606,6 +606,57 @@ body {
   color: var(--accent);
 }
 
+.stack-chip-planned {
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px dashed var(--border);
+}
+
+.stack-chip {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.stack-chip-live {
+  background: color-mix(in srgb, var(--green) 12%, var(--surface-2));
+  color: var(--green);
+  border: 1px solid color-mix(in srgb, var(--green) 25%, var(--border));
+}
+
+.evidence-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--border);
+}
+
+.evidence-chip-high {
+  background: color-mix(in srgb, var(--green) 12%, var(--surface-2));
+  color: var(--green);
+}
+
+.evidence-chip-medium {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
+  color: var(--accent);
+}
+
+.evidence-chip-low {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.evidence-chip-neutral {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
 .btn-primary {
   border-radius: 0.625rem;
   background: var(--accent);

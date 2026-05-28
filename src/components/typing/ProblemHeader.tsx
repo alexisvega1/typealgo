@@ -5,6 +5,7 @@ import type { RecallMode, Snippet, TrainingMode } from "@/lib/types";
 import { getPatternPack } from "@/data/curriculum";
 import { formatCareerGoal } from "@/lib/curriculum-engine";
 import { trainingModeLabel } from "@/lib/training-mode";
+import { EvidenceIndicators } from "@/components/curriculum/EvidenceIndicators";
 import type { CareerLevelId, CompanyTrackId } from "@/lib/types";
 
 const RECALL_LABEL: Record<RecallMode, string> = {
@@ -108,6 +109,9 @@ export function ProblemHeader({
         {snippet.description && (
           <p className="mt-2 text-sm text-muted">{snippet.description}</p>
         )}
+        <div className="mt-2">
+          <EvidenceIndicators snippet={snippet} companyTrack={companyTrack} compact />
+        </div>
       </motion.div>
     </header>
   );

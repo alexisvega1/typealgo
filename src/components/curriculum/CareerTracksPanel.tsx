@@ -23,9 +23,13 @@ export function CareerTracksPanel() {
     <section className="card">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="card-title">Implementation Fluency Tracks</h2>
+          <h2 className="card-title">Evidence-weighted fluency tracks</h2>
           <p className="card-subtitle">
             What kind of engineer are you training to become?
+          </p>
+          <p className="mt-2 text-xs text-muted leading-relaxed max-w-2xl">
+            Tracks weight motifs common in publicly discussed prep — not company interview
+            lists. Recommendations are probabilistic.
           </p>
         </div>
         <div className="text-right text-sm">
@@ -105,9 +109,8 @@ export function CareerTracksPanel() {
 
       {companyTrack !== "general" && (
         <p className="mt-4 text-xs text-muted leading-relaxed">
-          {profile.track.coaching.sprintEmphasis}. This is{" "}
-          <span className="text-foreground">{profile.track.marketingLabel}</span>
-          {" "}— not a problem dump.
+          {profile.track.evidenceDisclaimer}{" "}
+          Suggested mode: {trainingModeLabel(suggestedMode)}.
         </p>
       )}
     </section>
