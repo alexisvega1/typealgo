@@ -44,7 +44,7 @@ export function ContentStrategyPanel() {
         <h2 className="card-title">Inspiration Sources</h2>
         <p className="card-subtitle">Structure and progression — not verbatim cloning</p>
         <div className="mt-4 space-y-3">
-          {CONTENT_SOURCES.filter((s) => s.id !== "algotype-original").map((source) => (
+          {CONTENT_SOURCES.filter((s) => s.id !== "typealgo-original").map((source) => (
             <div key={source.id} className="rounded-lg bg-surface-2 px-4 py-3 text-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{source.name}</span>

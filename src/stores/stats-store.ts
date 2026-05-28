@@ -2,7 +2,10 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { migrateLegacyStorageKeys } from "@/lib/migrate-storage";
 import { safeLocalStorage } from "@/lib/safe-storage";
+
+migrateLegacyStorageKeys();
 import { computeStreak, localDateKey } from "@/lib/heatmap";
 import type {
   DailyActivity,
@@ -86,9 +89,9 @@ export const useStatsStore = create<StatsState>()(
       hydrateFromCloud: (stats) => set({ ...stats }),
     }),
     {
-      name: "algotype-stats",
+      name: "typealgo-stats",
       storage: createJSONStorage(() => safeLocalStorage),
-      version: 1,
+      version: 2,
       migrate: (state) => state ?? emptyStats,
     },
   ),

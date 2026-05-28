@@ -11,7 +11,7 @@ export const CONTENT_PACKS: ContentPack[] = [
     languages: ["python", "javascript", "java", "cpp"],
     motifFocus: ["hash-lookup", "sliding-window-expand", "two-pointer-converge", "binary-search-mid"],
     targetSnippetCount: 30,
-    inspiration: ["algotype-original", "hackerrank-progression"],
+    inspiration: ["typealgo-original", "hackerrank-progression"],
   },
   {
     id: "interview-blind-track",
@@ -44,7 +44,7 @@ export const CONTENT_PACKS: ContentPack[] = [
     languages: ["python"],
     motifFocus: [] as SyntaxMotif[],
     targetSnippetCount: 60,
-    inspiration: ["algotype-original"],
+    inspiration: ["typealgo-original"],
   },
   {
     id: "cross-language-reflex",
@@ -111,7 +111,7 @@ export const CONTENT_PACKS: ContentPack[] = [
     languages: ["python"],
     motifFocus: [] as SyntaxMotif[],
     targetSnippetCount: 30,
-    inspiration: ["algotype-original"],
+    inspiration: ["typealgo-original"],
   },
   {
     id: "company-anthropic",
@@ -122,7 +122,7 @@ export const CONTENT_PACKS: ContentPack[] = [
     languages: ["python"],
     motifFocus: [] as SyntaxMotif[],
     targetSnippetCount: 28,
-    inspiration: ["algotype-original", "leetcode-pattern"],
+    inspiration: ["typealgo-original", "leetcode-pattern"],
   },
   {
     id: "company-deepmind",
@@ -133,7 +133,7 @@ export const CONTENT_PACKS: ContentPack[] = [
     languages: ["python"],
     motifFocus: ["dp-tabulation", "binary-search-answer", "graph-adjacency"],
     targetSnippetCount: 30,
-    inspiration: ["algotype-original", "project-euler"],
+    inspiration: ["typealgo-original", "project-euler"],
   },
   {
     id: "company-jane-street",

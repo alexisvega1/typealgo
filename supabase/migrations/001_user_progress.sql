@@ -1,4 +1,4 @@
--- AlgoType cloud sync: one row per user, local-first JSON payload
+-- TypeAlgo cloud sync: one row per user, local-first JSON payload
 create table if not exists public.user_progress (
   user_id uuid primary key references auth.users (id) on delete cascade,
   payload jsonb not null default '{}'::jsonb,

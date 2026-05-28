@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { User } from "@supabase/supabase-js";
+import { migrateLegacyStorageKeys } from "@/lib/migrate-storage";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { syncProgress } from "@/lib/sync/engine";
@@ -25,6 +26,10 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const markSynced = useSyncStore((s) => s.markSynced);
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncing = useRef(false);
+
+  useEffect(() => {
+    migrateLegacyStorageKeys();
+  }, []);
 
   const runSync = async (userId: string) => {
     if (syncing.current) return;

@@ -2,7 +2,10 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { migrateLegacyStorageKeys } from "@/lib/migrate-storage";
 import { safeLocalStorage } from "@/lib/safe-storage";
+
+migrateLegacyStorageKeys();
 import type { RecallMode, TrainingMode, TypingSettings } from "@/lib/types";
 
 interface SettingsState extends TypingSettings {
@@ -45,9 +48,9 @@ export const useSettingsStore = create<SettingsState>()(
       hydrateFromCloud: (settings) => set({ ...settings }),
     }),
     {
-      name: "algotype-settings",
+      name: "typealgo-settings",
       storage: createJSONStorage(() => safeLocalStorage),
-      version: 2,
+      version: 3,
       migrate: (state) => {
         const s = (state ?? {}) as TypingSettings;
         if (!s.trainingMode) {

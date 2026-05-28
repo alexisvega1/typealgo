@@ -12,12 +12,12 @@ export interface ContentSourceMeta {
 
 /**
  * Registry of inspiration sources.
- * AlgoType derives motifs and progression structure — never mirrors copyrighted solution text.
+ * TypeAlgo derives motifs and progression structure — never mirrors copyrighted solution text.
  */
 export const CONTENT_SOURCES: ContentSourceMeta[] = [
   {
-    id: "algotype-original",
-    name: "AlgoType Original",
+    id: "typealgo-original",
+    name: "TypeAlgo Original",
     role: "patterns",
     deriveFrom: ["canonical motifs", "retrieval decomposition", "fluency tiers"],
     avoid: ["bulk problem dumps"],

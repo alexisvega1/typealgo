@@ -21,9 +21,9 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
-          <span className="logo-mark">AT</span>
+          <span className="logo-mark">TA</span>
           <span className="text-lg font-semibold tracking-tight">
-            Algo<span className="text-accent">Type</span>
+            Type<span className="text-accent">Algo</span>
           </span>
         </Link>
 

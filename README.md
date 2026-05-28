@@ -1,28 +1,29 @@
-# AlgoType
+# TypeAlgo
 
-**Implementation cognition training** — not problem exposure, procedural fluency.
+**Type something that matters.** — algorithmic fluency training.
 
 > Most interview prep focuses on problem exposure.
 >
-> AlgoType focuses on procedural fluency: turning common implementation patterns into reflexes through retrieval, repetition, and pressure-tested execution.
+> TypeAlgo focuses on procedural fluency: turning common implementation patterns into reflexes through retrieval, repetition, and pressure-tested execution.
 
-AlgoType is a performance-first typing trainer for algorithmic implementation. It trains **syntax motifs** — reusable chunks like BFS queue loops, binary search boundaries, and DP tabulation — across four cognitive modes designed to mirror how engineers actually learn.
+**Implementation cognition, not problem dumps.**
 
-![AlgoType typing session](./docs/screenshots/typing-session.png)
-<!-- Screenshot placeholder: capture Type mode with syntax highlighting -->
+TypeAlgo is a performance-first typing trainer for algorithmic implementation. It trains **syntax motifs** — reusable chunks like BFS queue loops, binary search boundaries, and DP tabulation — across four cognitive modes designed to mirror how engineers actually learn.
+
+![TypeAlgo typing session](./docs/screenshots/typing-session.png)
 
 ---
 
-## Why AlgoType exists
+## Why TypeAlgo exists
 
 | Platform | What it optimizes |
 |----------|-------------------|
 | LeetCode / HackerRank | Problem exposure & catalog breadth |
 | Monkeytype | Raw typing speed on random text |
-| NeetCode | Video + solution walkthroughs |
-| **AlgoType** | **Implementation reflexes, retrieval strength, pressure execution** |
+| algotype.net | Programmer typing / syntax practice |
+| **TypeAlgo** | **Implementation reflexes, retrieval strength, pressure execution** |
 
-AlgoType is **not** a LeetCode clone. All curriculum content is independently authored. The ingestion pipeline enforces canonical standards, motif extraction, and prerequisite validation — inspired by public patterns, never mirrored verbatim.
+TypeAlgo is **not** a LeetCode clone. All curriculum content is independently authored. The ingestion pipeline enforces canonical standards, motif extraction, and evidence-weighted track associations — inspired by public patterns, never mirrored verbatim.
 
 ---
 
@@ -35,83 +36,25 @@ AlgoType is **not** a LeetCode clone. All curriculum content is independently au
 | **Review** | Consolidation | Motif study, hesitation analysis, line stepping |
 | **Sprint** | Pressure | Interview simulation — type from memory under timer |
 
-Each mode targets a different phase of procedural learning. Switch modes from the header toggle.
-
 ---
 
 ## Curriculum architecture
 
 ```
-Tracks (company cognitive profiles)
+Tracks (evidence-weighted cognitive profiles)
   × Levels (Foundation → Research)
   × Modes (Type / Recall / Review / Sprint)
   × Motifs (reusable implementation chunks)
+  × Languages (Python live → TypeScript, Go, Rust roadmap)
 ```
 
 ### Tiers
 
 | Tier | Snippets | Focus |
 |------|----------|-------|
-| Core Reflex | 39 | Hash maps, windows, pointers — syntax fluency |
-| Interview Fluency | 34 | Blind-75-style progression (independently authored) |
+| Core Reflex | 39 | Hash maps, windows, pointers |
+| Interview Fluency | 34 | Independently authored interview motifs |
 | Advanced Fluency | 12 | Hard DP, graphs, heaps |
-
-### Motif system
-
-Every snippet is tagged with **syntax motifs** — e.g. `bfs-queue`, `binary-search-boundary`, `dp-tabulation`. Motifs power:
-
-- Adaptive resurfacing (weak motifs resurface sooner)
-- Predictive coaching (session-end recommendations)
-- Review mode decomposition (line-range motif focus)
-- Company track weighting (Meta → graphs; Google → correctness)
-
-### Content ingestion pipeline
-
-```
-Draft → validate standards → extract motifs → normalize code
-      → check prerequisite graph → register snippet
-```
-
-Key safeguards in `src/lib/content/`:
-
-- **Derive vs avoid rules** per inspiration source (NeetCode, LeetCode patterns, Codeforces, etc.)
-- **Independent authorship enforcement** — no verbatim cloning
-- **Prerequisite graph validation** — cycle detection, learning paths
-- **Motif extraction** — heuristic decomposition (AST/ML hook point)
-
-### Company implementation fluency tracks
-
-Train toward a cognitive profile, not a problem dump:
-
-- **Meta** — speed + graphs + sprint tempo
-- **Google** — breadth + correctness + edge cases
-- **OpenAI / Anthropic** — Python backend + ML infra
-- **DeepMind** — algorithms + scientific computing
-- **Jane Street** — probability + precision (planned)
-
-Levels follow a Levels.fyi-inspired ladder: Foundation → Junior → Mid → Senior → Staff → Research.
-
----
-
-## Adaptive resurfacing
-
-When **Adaptive** is enabled, snippet selection weights:
-
-1. Weak accuracy / low WPM on prior sessions
-2. Keystroke hesitation hotspots (>350ms delays)
-3. Spacing — snippets not seen recently get boosted
-4. Track + level profile — company motifs and difficulty bias
-
-This optimizes for **fluency density**, not catalog size.
-
----
-
-## Performance-first philosophy
-
-- **DOM-direct typing updates** — no per-keystroke React re-renders
-- **Local-first** — full functionality offline; network never blocks typing
-- **Optional cloud sync** — GitHub OAuth + Supabase background merge
-- **Lightweight tokenizer** — no Monaco/CodeMirror overhead
 
 ---
 
@@ -127,77 +70,26 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Optional: cloud sync
 
-Copy `.env.example` to `.env.local` and add Supabase credentials. The app works fully without them.
-
 ```bash
 cp .env.example .env.local
-```
-
----
-
-## Controls
-
-| Key | Type / Recall | Review | Sprint |
-|-----|---------------|--------|--------|
-| `Tab` | Indent | — | — |
-| `Shift+Tab` | Next snippet | Next snippet | Next snippet |
-| `↑` / `↓` | — | Step lines | — |
-| `[` / `]` | — | Cycle motifs | — |
-| `?` | Reveal blank | — | Disabled |
-| `Esc` | Restart | Restart | Restart |
-
----
-
-## Project structure
-
-```
-src/
-├── app/                    # Next.js App Router pages
-├── components/
-│   ├── typing/             # TypingTest, modes, results
-│   ├── curriculum/         # Curriculum + track panels
-│   ├── coach/              # Predictive coaching UI
-│   └── analytics/          # Stats, heatmap, radar
-├── data/curriculum/        # Canonical snippet registry (~85)
-├── lib/
-│   ├── content/            # Ingestion pipeline, packs, standards
-│   ├── curriculum-engine/  # Company tracks, levels, weighting
-│   ├── coach/              # Training plans, recommendations
-│   └── modes/              # Review analytics, sprint metrics
-└── stores/                 # Zustand + safe localStorage persistence
+# Add Supabase credentials — app works fully offline without them
 ```
 
 ---
 
 ## Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/alexisvega1/algotype)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/alexisvega1/typealgo)
 
-```bash
-npm run build
-npm run start
-```
+Recommended Vercel subdomain: **`typealgo.vercel.app`**
 
-Works on Vercel out of the box. Set `NEXT_PUBLIC_*` env vars for optional Supabase sync.
-
----
-
-## Roadmap
-
-- [ ] Expand Interview Fluency tier toward 100 snippets
-- [ ] ML engineering fluency packs (NumPy, pandas, PyTorch)
-- [ ] Sprint replay analysis ("At 01:22 you hesitated on…")
-- [ ] Community-authored motif packs
-- [ ] AI motif decomposition (replace heuristic extractor)
-- [ ] Seasonal Advent of Code sprint events
+Future domain: **`typealgo.ai`**
 
 ---
 
 ## Stack
 
-- Next.js 16 (App Router) · TypeScript · Tailwind CSS v4
-- Zustand (persisted state) · Framer Motion · Recharts
-- Supabase (optional auth + sync)
+Next.js 16 · TypeScript · Tailwind v4 · Zustand · Framer Motion · Recharts · Supabase (optional)
 
 ---
 
@@ -205,4 +97,4 @@ Works on Vercel out of the box. Set `NEXT_PUBLIC_*` env vars for optional Supaba
 
 MIT — see [LICENSE](./LICENSE).
 
-All curriculum implementations are independently authored. AlgoType derives structural inspiration from public algorithm education resources without copying copyrighted solution text.
+All curriculum implementations are independently authored.

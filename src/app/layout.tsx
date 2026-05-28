@@ -15,9 +15,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AlgoType — Algorithmic Fluency Training",
+  title: {
+    default: "TypeAlgo — Algorithmic Fluency Training",
+    template: "%s · TypeAlgo",
+  },
   description:
-    "Procedural fluency training for technical careers. Build implementation reflexes through Type, Recall, Review, and Sprint modes.",
+    "Type something that matters. Procedural fluency training — implementation cognition, not problem dumps.",
+  applicationName: "TypeAlgo",
+  openGraph: {
+    title: "TypeAlgo",
+    description: "Algorithmic fluency training. Type, Recall, Review, Sprint.",
+    siteName: "TypeAlgo",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "TypeAlgo",
+    description: "Implementation cognition, not problem dumps.",
+  },
 };
 
 export default function RootLayout({

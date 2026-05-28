@@ -180,14 +180,14 @@ export interface SnippetEvidenceProfile {
 /** How a snippet relates to external inspiration — derived, not cloned. */
 export interface ContentProvenance {
   inspiration: ContentSourceId;
-  /** Always true for AlgoType-authored snippets derived from public patterns. */
+  /** Always true for TypeAlgo-authored snippets derived from public patterns. */
   independentlyAuthored: true;
   externalId?: string;
   notes?: string;
 }
 
 export type ContentSourceId =
-  | "algotype-original"
+  | "typealgo-original"
   | "neetcode-inspired"
   | "leetcode-pattern"
   | "hackerrank-progression"
