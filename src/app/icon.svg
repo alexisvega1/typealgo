@@ -5,21 +5,31 @@
       <stop offset="0.45" stop-color="#e2b714"/>
       <stop offset="1" stop-color="#a67c00"/>
     </linearGradient>
+    <linearGradient id="body-shine" x1="10" y1="16" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
     <linearGradient id="paper" x1="14" y1="4" x2="26" y2="16" gradientUnits="userSpaceOnUse">
       <stop stop-color="#faf8f2"/>
       <stop offset="1" stop-color="#e8e4d9"/>
     </linearGradient>
   </defs>
-  <path d="M13 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5a1 1 0 0 1-1 1H13a1 1 0 0 1-1-1V7a1.5 1.5 0 0 1 1-1.5Z" fill="url(#paper)"/>
-  <rect x="15" y="8.5" width="6" height="0.9" rx="0.45" fill="#c9c4b8" opacity="0.85"/>
-  <rect x="15" y="10.4" width="4.2" height="0.9" rx="0.45" fill="#c9c4b8" opacity="0.6"/>
-  <rect x="19.4" y="10.1" width="0.85" height="1.5" rx="0.2" fill="#e2b714"/>
   <rect x="5" y="17" width="30" height="17" rx="3.5" fill="url(#body)"/>
-  <rect x="7.5" y="19.5" width="25" height="11.5" rx="2" fill="#141418"/>
+  <rect x="5" y="17" width="30" height="8" rx="3.5" fill="url(#body-shine)" opacity="0.55"/>
+  <rect x="7.5" y="19.5" width="25" height="11.5" rx="2" fill="#141418" opacity="0.92"/>
   <rect x="9.5" y="21" width="3.6" height="2.4" rx="0.55" fill="#2a2a30"/>
   <rect x="14.2" y="21" width="3.6" height="2.4" rx="0.55" fill="#2a2a30"/>
   <rect x="18.9" y="21" width="3.6" height="2.4" rx="0.55" fill="#e2b714"/>
   <rect x="23.6" y="21" width="3.6" height="2.4" rx="0.55" fill="#2a2a30"/>
   <rect x="28.3" y="21" width="2.4" height="2.4" rx="0.55" fill="#2a2a30"/>
+  <rect x="9" y="25.2" width="22" height="1.2" rx="0.6" fill="#0d0d0f" opacity="0.35"/>
   <circle cx="33" cy="26.5" r="2.1" fill="#c9970c" stroke="#f0d060" stroke-width="0.5"/>
+  <path d="M8 34h24" stroke="#a67c00" stroke-width="0.75" stroke-linecap="round" opacity="0.45"/>
+  <path d="M13 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5a1 1 0 0 1-1 1H13a1 1 0 0 1-1-1V7a1.5 1.5 0 0 1 1-1.5Z" fill="url(#paper)"/>
+  <path d="M13 5.5c0-1.2 2.2-2 7-2s7 .8 7 2" stroke="#d4cfc2" stroke-width="0.6" fill="none"/>
+  <rect x="15" y="8.5" width="6" height="0.9" rx="0.45" fill="#c9c4b8" opacity="0.85"/>
+  <rect x="15" y="10.4" width="4.2" height="0.9" rx="0.45" fill="#c9c4b8" opacity="0.6"/>
+  <rect x="19.4" y="10.1" width="0.85" height="1.5" rx="0.2" fill="#e2b714"/>
+  <rect x="10.5" y="15.6" width="19" height="2.4" rx="0.4" fill="#141418"/>
+  <rect x="10.5" y="15.6" width="19" height="0.6" rx="0.2" fill="#0a0a0c" opacity="0.55"/>
 </svg>

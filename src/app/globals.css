@@ -420,6 +420,17 @@ body {
   touch-action: pan-x;
   padding-top: 0.375rem;
   padding-bottom: 0.75rem;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.code-viewport.code-viewport-typing {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.code-viewport-typing .code-line-active .char-pending {
+  opacity: 0.9;
 }
 
 .code-viewport-typing .code-viewport-lines {
@@ -2218,6 +2229,16 @@ body {
     max-height: none;
     height: clamp(14rem, 52dvh, 24rem);
     overflow: hidden;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .code-viewport-typing .char-pending {
+    opacity: 0.72;
+  }
+
+  .code-viewport-typing .code-line-active .char-pending {
+    opacity: 0.92;
   }
 
   .problem-header {

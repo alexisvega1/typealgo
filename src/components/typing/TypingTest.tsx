@@ -556,7 +556,8 @@ export function TypingTest() {
       translateY = Math.max(lineMinY, Math.min(lineMaxY, translateY));
 
       const contentMinY = Math.min(0, viewportHeight - displayHeight);
-      translateY = Math.max(contentMinY, Math.min(0, translateY));
+      const contentMaxY = isFirstLine ? Math.max(0, topPad - lineTop) : 0;
+      translateY = Math.max(contentMinY, Math.min(contentMaxY, translateY));
 
       linesLayer.style.transform = `translate3d(0, ${Math.round(translateY)}px, 0)`;
     },

@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   description:
     "Type something that matters. Procedural fluency training — implementation cognition, not problem dumps.",
   applicationName: "TypeAlgo",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     title: "TypeAlgo",
     description: "Algorithmic fluency training. Type, Recall, Review, Sprint.",
