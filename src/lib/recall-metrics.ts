@@ -1,3 +1,4 @@
+import { isAutoKeystroke } from "./semantic-traversal";
 import type { KeystrokeEvent, RecallMetrics, TypingResult } from "./types";
 
 export function computeRecallMetrics(
@@ -15,7 +16,7 @@ export function computeRecallMetrics(
   const weakTokenDelays = new Map<string, { total: number; count: number; errors: number }>();
 
   for (const ks of keystrokes) {
-    if (ks.autoIndent) continue;
+    if (isAutoKeystroke(ks)) continue;
     if (!blankMask[ks.index]) continue;
 
     if (ks.correct) blanksCorrect++;

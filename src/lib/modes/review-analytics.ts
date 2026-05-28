@@ -1,6 +1,7 @@
 import { getSnippet } from "@/data/curriculum";
 import { getMotifInfo } from "@/data/curriculum/motifs";
 import { estimateMotifMastery } from "@/lib/coach/predictive";
+import { isAutoKeystroke } from "@/lib/semantic-traversal";
 import type { KeystrokeEvent, Snippet, SyntaxMotif, TypingResult } from "@/lib/types";
 import { MOTIF_KEYWORDS } from "./motif-notes";
 
@@ -46,7 +47,7 @@ export function buildReviewAnalytics(
 
   for (const session of past) {
     for (const ks of session.keystrokes) {
-      if (ks.autoIndent || ks.delayMs < 280) continue;
+      if (isAutoKeystroke(ks) || ks.delayMs < 280) continue;
       hesitationIndices.add(ks.index);
       const start = Math.max(0, ks.index - 12);
       const token =

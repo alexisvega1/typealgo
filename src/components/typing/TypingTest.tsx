@@ -15,7 +15,11 @@ import { calcAccuracy, calcRawWpm, calcWpm } from "@/lib/metrics";
 import { buildRecallPlan, computeRecallIntensity } from "@/lib/recall-blanks";
 import { computeRecallMetrics, priorSnippetRecallStats } from "@/lib/recall-metrics";
 import { analyzeSession, applySuggestedRecallMode } from "@/lib/coach";
-import { isLeadingIndentSpace } from "@/lib/indent";
+import {
+  countCognitiveChars,
+  isAutoKeystroke,
+  isStructuralChar,
+} from "@/lib/semantic-traversal";
 import { applyCharPending, applyCharTyped, resetAllChars, showAllCharsReview } from "@/lib/typing-display";
 import {
   effectiveRecallMode,
@@ -478,14 +482,47 @@ export function TypingTest() {
     [findCursorTarget, updateActiveLine],
   );
 
+  const autoAdvanceStructural = useCallback(
+    (now: number) => {
+      const tokens = tokensRef.current;
+      while (
+        indexRef.current < tokens.length &&
+        isStructuralChar(tokens, indexRef.current)
+      ) {
+        const idx = indexRef.current;
+        const el = charRefs.current[idx];
+        const ch = tokens[idx].char;
+        if (startTimeRef.current != null) {
+          keystrokesRef.current.push({
+            char: ch === "\n" ? "\n" : " ",
+            index: idx,
+            correct: true,
+            timestamp: now,
+            delayMs: 0,
+            wasBlank: false,
+            autoStructural: true,
+          });
+        }
+        if (el) {
+          applyCharTyped(el, idx, tokens, true, blankMaskRef.current);
+          el.classList.add("char-structural-auto");
+        }
+        indexRef.current = idx + 1;
+      }
+      updateCursor(indexRef.current);
+    },
+    [updateCursor],
+  );
+
   useEffect(() => {
     if (isReviewMode) return;
+    autoAdvanceStructural(performance.now());
     updateCursor(indexRef.current);
     if (lineRefs.current[0]) {
       lineRefs.current[0].classList.add("code-line-active");
       activeLineRef.current = 0;
     }
-  }, [snippet, tick, updateCursor, isReviewMode]);
+  }, [snippet, tick, updateCursor, isReviewMode, autoAdvanceStructural]);
 
   const refreshStats = useCallback(() => {
     if (!startTimeRef.current) return;
@@ -554,7 +591,7 @@ export function TypingTest() {
       durationMs,
       correctChars: correctRef.current,
       incorrectChars: incorrectRef.current,
-      totalChars: tokensRef.current.length,
+      totalChars: countCognitiveChars(tokensRef.current),
       timestamp: Date.now(),
       keystrokes: keystrokesRef.current,
       trainingMode: trainingModeRef.current,
@@ -596,41 +633,21 @@ export function TypingTest() {
     refreshStats();
   }, [refreshStats]);
 
-  const autoAdvanceIndent = useCallback(
-    (now: number) => {
-      const tokens = tokensRef.current;
-      while (
-        indexRef.current < tokens.length &&
-        isLeadingIndentSpace(tokens, indexRef.current)
-      ) {
-        const idx = indexRef.current;
-        const el = charRefs.current[idx];
-        correctRef.current++;
-        keystrokesRef.current.push({
-          char: " ",
-          index: idx,
-          correct: true,
-          timestamp: now,
-          delayMs: 0,
-          wasBlank: false,
-          autoIndent: true,
-        });
-        if (el) {
-          applyCharTyped(el, idx, tokens, true, blankMaskRef.current);
-          el.classList.add("char-indent-auto");
-        }
-        indexRef.current = idx + 1;
-      }
-      updateCursor(indexRef.current);
-    },
-    [updateCursor],
-  );
-
   const typeChar = useCallback(
     (char: string, now: number): boolean => {
       const tokens = tokensRef.current;
-      const idx = indexRef.current;
+      let idx = indexRef.current;
       if (idx >= tokens.length) return false;
+
+      if (isStructuralChar(tokens, idx)) {
+        autoAdvanceStructural(now);
+        if (indexRef.current >= tokens.length) {
+          finishTest();
+          return true;
+        }
+        idx = indexRef.current;
+      }
+
       const expected = tokens[idx].char;
       const correct = char === expected;
       const delayMs = lastKeyTimeRef.current ? now - lastKeyTimeRef.current : 0;
@@ -651,8 +668,8 @@ export function TypingTest() {
       lastKeyTimeRef.current = now;
       setShowRevealHint(false);
 
-      if (correct && expected === "\n") {
-        autoAdvanceIndent(now);
+      if (correct) {
+        autoAdvanceStructural(now);
       } else {
         updateCursor(idx + 1);
       }
@@ -661,7 +678,7 @@ export function TypingTest() {
       if (indexRef.current >= tokens.length) finishTest();
       return true;
     },
-    [finishTest, refreshStats, updateCursor, autoAdvanceIndent],
+    [finishTest, refreshStats, updateCursor, autoAdvanceStructural],
   );
 
   const handleKeyDown = useCallback(
@@ -728,18 +745,6 @@ export function TypingTest() {
         e.preventDefault();
         if (e.shiftKey) {
           loadSnippet(snippetRef.current.id);
-          return;
-        }
-        const now = performance.now();
-        ensureStarted(now);
-        if (isLeadingIndentSpace(tokensRef.current, indexRef.current)) {
-          autoAdvanceIndent(now);
-          refreshStats();
-          return;
-        }
-        for (let i = 0; i < 3; i++) {
-          if (indexRef.current >= tokensRef.current.length) break;
-          typeChar(" ", now);
         }
         return;
       }
@@ -752,36 +757,43 @@ export function TypingTest() {
       const now = performance.now();
       ensureStarted(now);
       const tokens = tokensRef.current;
-      let idx = indexRef.current;
       if (e.key === "Backspace") {
         e.preventDefault();
-        if (idx === 0) return;
-        idx--;
-        const prevKs = keystrokesRef.current.pop();
-        if (prevKs?.correct) correctRef.current--;
-        else if (prevKs && !prevKs.correct) incorrectRef.current--;
-        if (prevKs?.wasBlank) {
-          if (prevKs.correct) blankCorrectRef.current--;
-          else blankIncorrectRef.current--;
+        if (keystrokesRef.current.length === 0) return;
+        while (keystrokesRef.current.length > 0) {
+          const prevKs = keystrokesRef.current.pop()!;
+          const charIdx = prevKs.index;
+          if (prevKs.correct && !isAutoKeystroke(prevKs)) correctRef.current--;
+          else if (!prevKs.correct && !isAutoKeystroke(prevKs)) incorrectRef.current--;
+          if (prevKs.wasBlank) {
+            if (prevKs.correct) blankCorrectRef.current--;
+            else blankIncorrectRef.current--;
+          }
+          revealedRef.current.delete(charIdx);
+          const el = charRefs.current[charIdx];
+          if (el) {
+            applyCharPending(el, charIdx, tokens, charIdx, blankMaskRef.current, revealedRef.current);
+            el.classList.remove("char-structural-auto", "char-indent-auto");
+          }
+          indexRef.current = charIdx;
+          if (!isAutoKeystroke(prevKs)) break;
         }
-        revealedRef.current.delete(idx);
-        const el = charRefs.current[idx];
-        if (el) {
-          applyCharPending(el, idx, tokens, idx, blankMaskRef.current, revealedRef.current);
-        }
-        indexRef.current = idx;
-        updateCursor(idx);
+        updateCursor(indexRef.current);
         lastKeyTimeRef.current = now;
         refreshStats();
       } else if (e.key === "Enter") {
         e.preventDefault();
-        typeChar("\n", now);
+        if (isStructuralChar(tokens, indexRef.current)) {
+          autoAdvanceStructural(now);
+          refreshStats();
+          if (indexRef.current >= tokens.length) finishTest();
+        }
       } else if (e.key.length === 1) {
         e.preventDefault();
         typeChar(e.key, now);
       }
     },
-    [finished, finishedCoach, loadSnippet, updateCursor, ensureStarted, refreshStats, typeChar, revealCurrent, autoAdvanceIndent, setRecallMode, setTrainingMode, typingEnabled, isReviewMode, reviewAnalytics, handleReviewNavigation, isSprintMode, sprintPhase, startSprintCountdown],
+    [finished, finishedCoach, loadSnippet, updateCursor, ensureStarted, refreshStats, typeChar, revealCurrent, autoAdvanceStructural, finishTest, setRecallMode, setTrainingMode, typingEnabled, isReviewMode, reviewAnalytics, handleReviewNavigation, isSprintMode, sprintPhase, startSprintCountdown],
   );
 
   const codeLines = useMemo(() => {
@@ -943,7 +955,7 @@ export function TypingTest() {
             </>
           ) : (
             <>
-              <kbd className="kbd">Tab</kbd> indent · <kbd className="kbd">Shift+Tab</kbd> next ·{" "}
+              Lines flow automatically · <kbd className="kbd">Shift+Tab</kbd> next ·{" "}
               {isRecallActive && (
                 <>
                   <kbd className="kbd">?</kbd> reveal ·{" "}

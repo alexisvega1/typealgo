@@ -278,7 +278,8 @@ body {
   text-underline-offset: 3px;
 }
 
-.char-indent-auto {
+.char-indent-auto,
+.char-structural-auto {
   opacity: 0.45;
   color: var(--muted) !important;
 }

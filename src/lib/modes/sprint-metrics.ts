@@ -1,4 +1,5 @@
 import { hesitationHotspots } from "@/lib/metrics";
+import { isAutoKeystroke } from "@/lib/semantic-traversal";
 import type { KeystrokeEvent, SprintGradingProfile, SprintMetrics } from "@/lib/types";
 
 const DEFAULT_PROFILE: SprintGradingProfile = {
@@ -29,7 +30,7 @@ export function computeSprintMetrics(
   incorrectChars: number,
   profile: SprintGradingProfile = DEFAULT_PROFILE,
 ): SprintMetrics {
-  const typed = keystrokes.filter((k) => !k.autoIndent);
+  const typed = keystrokes.filter((k) => !isAutoKeystroke(k));
   const hesitations = typed.filter((k) => k.delayMs > 350);
   const corrections = typed.filter((k) => !k.correct).length;
   const minutes = Math.max(durationMs / 60000, 0.01);

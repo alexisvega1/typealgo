@@ -259,7 +259,10 @@ export interface KeystrokeEvent {
   timestamp: number;
   delayMs: number;
   wasBlank?: boolean;
+  /** @deprecated use autoStructural */
   autoIndent?: boolean;
+  /** Structural auto-flow (newline, indent) — excluded from WPM / recall scoring */
+  autoStructural?: boolean;
 }
 
 export type RecallMode = "full-copy" | "token-blank" | "line-blank" | "skeleton";
