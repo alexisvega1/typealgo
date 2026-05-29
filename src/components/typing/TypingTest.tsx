@@ -10,7 +10,9 @@ import {
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { playTypingClick } from "@/lib/typing-sound";
 import { pickSnippet } from "@/data/curriculum";
+import { useAppearanceStore } from "@/stores/appearance-store";
 import { shouldAutoCompletePair } from "@/lib/auto-pair";
 import { tokenizeCode } from "@/lib/tokenizer";
 import { calcAccuracy, calcRawWpm, calcWpm } from "@/lib/metrics";
@@ -858,6 +860,8 @@ export function TypingTest() {
 
       const expected = tokens[idx].char;
       const correct = char === expected;
+      const { soundPack, soundVolume } = useAppearanceStore.getState();
+      if (soundPack !== "off") playTypingClick(correct, soundPack, soundVolume);
       const delayMs = lastKeyTimeRef.current ? now - lastKeyTimeRef.current : 0;
       const wasBlank = blankMaskRef.current[idx];
       keystrokesRef.current.push({ char, index: idx, correct, timestamp: now, delayMs, wasBlank });

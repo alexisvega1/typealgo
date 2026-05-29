@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef } from "react";
 import type { User } from "@supabase/supabase-js";
 import { migrateLegacyStorageKeys } from "@/lib/migrate-storage";
+import { AppearanceApplier } from "@/components/settings/AppearanceApplier";
 import { AuthErrorBanner } from "@/components/sync/AuthErrorBanner";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -116,6 +117,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <AppearanceApplier />
       <Suspense fallback={null}>
         <AuthErrorBanner />
       </Suspense>

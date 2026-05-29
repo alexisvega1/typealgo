@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { TypeAlgoLogo } from "@/components/brand/TypeAlgoLogo";
+import { UserSettingsModal } from "@/components/settings/UserSettingsModal";
 import { EnglishBaselineModal } from "@/components/baseline/EnglishBaselineModal";
 import {
   SaveProgressPrompt,
@@ -31,6 +32,9 @@ export function Header() {
   const filtersOpen = useUIStore((s) => s.filtersOpen);
   const toggleFilters = useUIStore((s) => s.toggleFilters);
   const setFiltersOpen = useUIStore((s) => s.setFiltersOpen);
+  const settingsOpen = useUIStore((s) => s.settingsOpen);
+  const setSettingsOpen = useUIStore((s) => s.setSettingsOpen);
+  const openSettings = useUIStore((s) => s.openSettings);
   const menuOpen = menuState?.open === true && menuState.path === pathname;
   const isMobileLayout = useIsMobileLayout();
 
@@ -48,11 +52,17 @@ export function Header() {
       if (e.key === "Escape") {
         closeMenu();
         setFiltersOpen(false);
+        setSettingsOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [menuOpen, filtersOpen, setFiltersOpen]);
+  }, [menuOpen, filtersOpen, setFiltersOpen, setSettingsOpen]);
+
+  const openSettingsFromMenu = () => {
+    closeMenu();
+    openSettings();
+  };
 
   const openSaveProgress = () => {
     closeMenu();
@@ -82,6 +92,7 @@ export function Header() {
         showTrigger={false}
       />
       <EnglishBaselineModal open={baselineOpen} onClose={() => setBaselineOpen(false)} />
+      <UserSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <div className="relative mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="logo-link flex shrink-0 items-center gap-2.5 group">
@@ -98,6 +109,10 @@ export function Header() {
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {!isMobileLayout && (
+            <SyncStatusIndicator variant="header" onOpenSettings={openSettings} />
+          )}
+
           {isTypingPage && (
             <button
               type="button"
@@ -158,7 +173,14 @@ export function Header() {
               )}
 
               <div className="header-menu-tools">
-                <span className="header-mobile-menu-label">Baseline</span>
+                <span className="header-mobile-menu-label">Preferences</span>
+                <button
+                  type="button"
+                  className="header-mobile-menu-link header-mobile-menu-action"
+                  onClick={openSettingsFromMenu}
+                >
+                  Settings
+                </button>
                 <button
                   type="button"
                   className="header-mobile-menu-link header-mobile-menu-action"
@@ -168,9 +190,23 @@ export function Header() {
                 </button>
               </div>
 
-              <div className="header-mobile-menu-footer">
-                <SyncStatusIndicator variant="menu" />
-                {saveProgressVisible && (
+              {isMobileLayout && (
+                <div className="header-mobile-menu-footer">
+                  <SyncStatusIndicator variant="menu" onOpenSettings={openSettingsFromMenu} />
+                  {saveProgressVisible && (
+                    <button
+                      type="button"
+                      className="save-progress-btn save-progress-btn-menu"
+                      onClick={openSaveProgress}
+                    >
+                      Save progress
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!isMobileLayout && saveProgressVisible && (
+                <div className="header-mobile-menu-footer">
                   <button
                     type="button"
                     className="save-progress-btn save-progress-btn-menu"
@@ -178,8 +214,8 @@ export function Header() {
                   >
                     Save progress
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </nav>
           </>
         )}

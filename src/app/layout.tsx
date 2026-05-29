@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { Fira_Code, Geist, Geist_Mono, IBM_Plex_Mono, JetBrains_Mono, Source_Code_Pro } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
@@ -18,6 +18,27 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-logo",
   subsets: ["latin"],
   weight: ["500", "600"],
+});
+
+const jetbrainsMonoCode = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+});
+
+const firaCode = Fira_Code({
+  variable: "--font-fira-code",
+  subsets: ["latin"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+const sourceCodePro = Source_Code_Pro({
+  variable: "--font-source-code-pro",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -62,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} ${jetbrainsMonoCode.variable} ${firaCode.variable} ${ibmPlexMono.variable} ${sourceCodePro.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AppProviders>
