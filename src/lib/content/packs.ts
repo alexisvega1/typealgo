@@ -83,7 +83,7 @@ export const CONTENT_PACKS: ContentPack[] = [
   {
     id: "company-meta",
     name: "Meta Interview Reflex",
-    description: "Speed + graphs emphasis — derived motifs, not company problem dumps.",
+    description: "Classic (no-AI) LeetCode round — one of Meta's two coding rounds.",
     status: "planned",
     domains: ["interviews"],
     languages: ["python"],
@@ -94,7 +94,7 @@ export const CONTENT_PACKS: ContentPack[] = [
   {
     id: "company-google",
     name: "Google Interview Reflex",
-    description: "Breadth + clean implementation motifs.",
+    description: "Classic DSA plus code-comprehension fluency (read, analyze, fix buggy code).",
     status: "planned",
     domains: ["interviews"],
     languages: ["python"],
@@ -105,8 +105,8 @@ export const CONTENT_PACKS: ContentPack[] = [
   {
     id: "company-openai",
     name: "OpenAI / Systems+ML Reflex",
-    description: "Systems patterns + ML API fluency chunks.",
-    status: "planned",
+    description: "Progressive four-gate system builds in Python (timed KV, iterators, rate limiters).",
+    status: "active",
     domains: ["interviews", "ml", "systems"],
     languages: ["python"],
     motifFocus: [] as SyntaxMotif[],
@@ -116,8 +116,8 @@ export const CONTENT_PACKS: ContentPack[] = [
   {
     id: "company-anthropic",
     name: "Anthropic Implementation Fluency",
-    description: "Python + backend + ML infra + reasoning clarity.",
-    status: "planned",
+    description: "Multi-stage Python system builds (KV store, rate limiters, config validation).",
+    status: "active",
     domains: ["interviews", "ml", "systems"],
     languages: ["python"],
     motifFocus: [] as SyntaxMotif[],
