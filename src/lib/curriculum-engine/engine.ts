@@ -200,8 +200,14 @@ export function computeTrackReadiness(
   };
 }
 
+export function levelShortLabel(levelId: CareerLevelId, trackId: CompanyTrackId): string {
+  const { track, level } = resolveProfile(trackId, levelId);
+  return track.levelScheme === "E" ? level.metaShortLabel : level.shortLabel;
+}
+
 export function formatCareerGoal(trackId: CompanyTrackId, levelId: CareerLevelId): string {
   const { track, level } = resolveProfile(trackId, levelId);
-  if (trackId === "general") return `${level.name} — general fluency`;
-  return `${track.name} · ${level.name}`;
+  const lvl = levelShortLabel(levelId, trackId);
+  if (trackId === "general") return `${level.name} (${lvl}) — general fluency`;
+  return `${track.name} · ${level.name} (${lvl})`;
 }

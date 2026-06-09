@@ -5,6 +5,7 @@ import {
   CAREER_LEVELS,
   computeTrackReadiness,
   formatCareerGoal,
+  levelShortLabel,
   recommendedTrainingMode,
   resolveProfile,
 } from "@/lib/curriculum-engine";
@@ -53,7 +54,7 @@ export function CareerTracksPanel() {
               }`}
             >
               <p className="font-medium">{track.name}</p>
-              <p className="mt-1 text-xs text-muted">{track.tagline}</p>
+              <p className="mt-1 text-xs text-muted line-clamp-2">{track.interviewDescription}</p>
             </button>
           );
         })}
@@ -72,7 +73,9 @@ export function CareerTracksPanel() {
       </div>
 
       <div className="mt-6">
-        <h3 className="text-sm font-medium">Procedural seniority ladder</h3>
+        <h3 className="text-sm font-medium">
+          {profile.track.levelScheme === "E" ? "Meta E-level ladder" : "Procedural seniority ladder"}
+        </h3>
         <div className="mt-3 flex flex-wrap gap-2">
           {CAREER_LEVELS.map((level) => (
             <button
@@ -85,7 +88,7 @@ export function CareerTracksPanel() {
                   : "bg-surface-2 text-muted hover:text-foreground"
               }`}
             >
-              {level.name}
+              {level.name} ({levelShortLabel(level.id, companyTrack)})
             </button>
           ))}
         </div>
@@ -109,6 +112,12 @@ export function CareerTracksPanel() {
 
       {companyTrack !== "general" && (
         <p className="mt-4 text-xs text-muted leading-relaxed">
+          {profile.track.interviewDescription}
+        </p>
+      )}
+
+      {companyTrack !== "general" && (
+        <p className="mt-2 text-xs text-muted leading-relaxed">
           {profile.track.evidenceDisclaimer}{" "}
           Suggested mode: {trainingModeLabel(suggestedMode)}.
         </p>

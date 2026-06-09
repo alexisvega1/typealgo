@@ -22,6 +22,10 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
     id: "general",
     name: "General Fluency",
     tagline: "Balanced procedural training across all patterns",
+    interviewDescription:
+      "Balanced procedural fluency across algorithms and languages — no company-specific interview format.",
+    defaultLanguage: "python",
+    levelScheme: "L",
     marketingLabel: "Universal interview prep motifs",
     evidenceDisclaimer: TRACK_EVIDENCE_BASE,
     cognitiveProfile: "Breadth-first syntax fluency without company bias",
@@ -42,8 +46,12 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   {
     id: "meta",
     name: "Meta-oriented fluency",
-    tagline: "Graph-heavy, speed-oriented motifs common in public prep",
-    marketingLabel: "Common graph-heavy interview prep emphasis",
+    tagline: "Classic LeetCode round — speed and execution under pressure",
+    interviewDescription:
+      "Trains Meta's classic (no-AI) coding round: LeetCode-style problems where speed matters. Since Oct 2025 Meta also runs a separate AI-enabled CoderPad round (multi-file codebase) — this track targets the unaided classic round only. Levels map to Meta E3–E6.",
+    defaultLanguage: "python",
+    levelScheme: "E",
+    marketingLabel: "Classic Meta-style LeetCode round",
     evidenceDisclaimer:
       "Weights motifs frequently tagged in public Meta-style prep discussions — not Meta interview content.",
     cognitiveProfile: "High-speed graph traversal, queue/stack reflexes, execution under pressure",
@@ -90,13 +98,17 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   {
     id: "google",
     name: "Google-oriented fluency",
-    tagline: "Breadth + correctness motifs common in public prep",
-    marketingLabel: "Common breadth-oriented interview prep emphasis",
+    tagline: "Classic DSA — breadth, correctness, and comprehension",
+    interviewDescription:
+      "Classic DSA at medium–hard difficulty. Languages restricted to Python, Java, C++, and JavaScript. 2026 additions include AI-assisted pilots (Gemini) and a code-comprehension round (read, analyze, and fix existing buggy code).",
+    defaultLanguage: "python",
+    levelScheme: "L",
+    marketingLabel: "Google-style DSA + comprehension",
     evidenceDisclaimer:
       "Weights motifs associated with breadth/correctness in public Google-style prep — not Google interview content.",
     cognitiveProfile: "Broad algorithm coverage, readable implementation, edge-case discipline",
     status: "active",
-    languages: ["python"],
+    languages: ["python", "javascript", "java", "cpp"],
     packId: "company-google",
     motifWeights: {
       "binary-search-mid": 1.8,
@@ -139,8 +151,12 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   {
     id: "openai",
     name: "OpenAI-oriented fluency",
-    tagline: "ML/backend motifs common in public infra prep",
-    marketingLabel: "Common ML/backend-oriented prep emphasis",
+    tagline: "Production components — progressive multi-gate building",
+    interviewDescription:
+      "Production-component interviews, not LeetCode puzzles. Progressive four-gate format on one escalating problem (canonical examples: time-based KV store, resumable iterator, rate limiter, IP iterator). Python is primary; Rust/Go appear in infra roles.",
+    defaultLanguage: "python",
+    levelScheme: "L",
+    marketingLabel: "OpenAI-style systems building",
     evidenceDisclaimer:
       "Weights Python backend + ML infra motifs from public prep literature — not OpenAI interview content.",
     cognitiveProfile: "Python backend fluency, async patterns, tensor ops, systems motifs",
@@ -185,8 +201,12 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   {
     id: "anthropic",
     name: "Anthropic-oriented fluency",
-    tagline: "Python backend + ML infra motifs in public prep",
-    marketingLabel: "Common backend + ML infra prep emphasis",
+    tagline: "Multi-stage system building in shared Python",
+    interviewDescription:
+      "Python in a shared environment (CodeSignal/Colab/Replit). Multi-stage system-building where one problem escalates (canonical: in-memory KV store → sorted output formatting → TTL/timestamp state). Values clean, tested, production-quality code over speed; concurrency (threading/asyncio) appears.",
+    defaultLanguage: "python",
+    levelScheme: "L",
+    marketingLabel: "Anthropic-style staged systems",
     evidenceDisclaimer:
       "Weights motifs common in publicly discussed backend/ML infra prep — not Anthropic interview content.",
     cognitiveProfile: "Readable Python, backend systems, ML infra, reasoning clarity",
@@ -231,8 +251,12 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
   {
     id: "deepmind",
     name: "DeepMind-oriented fluency",
-    tagline: "Algorithm + research motifs common in public prep",
-    marketingLabel: "Common research-engineering prep emphasis",
+    tagline: "Unaided algorithm fluency — AI tools prohibited",
+    interviewDescription:
+      "LeetCode Medium and Hard with debugging, edge cases, and code clarity. AI tools are prohibited in technical rounds — unaided typing fluency is explicitly what they filter for. This is the strongest fit for TypeAlgo's core thesis.",
+    defaultLanguage: "python",
+    levelScheme: "L",
+    marketingLabel: "DeepMind-style unaided fluency",
     evidenceDisclaimer:
       "Weights algorithm + scientific computing motifs from public research-engineering prep — not DeepMind interview content.",
     cognitiveProfile: "Algorithm breadth, tensor reasoning, optimization, scientific Python",
@@ -280,6 +304,10 @@ export const COMPANY_TRACKS: CompanyTrack[] = [
     id: "jane-street",
     name: "Quant-oriented fluency",
     tagline: "Probability + precision motifs in public quant prep",
+    interviewDescription:
+      "Quant/math precision under pressure — mathematical reasoning and tight implementation (planned track).",
+    defaultLanguage: "python",
+    levelScheme: "L",
     marketingLabel: "Common quant/math prep emphasis",
     evidenceDisclaimer:
       "Weights math/precision motifs from public quant prep discussions — not Jane Street interview content.",

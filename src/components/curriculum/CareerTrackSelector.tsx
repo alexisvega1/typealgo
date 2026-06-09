@@ -1,6 +1,6 @@
 "use client";
 
-import { COMPANY_TRACKS, CAREER_LEVELS } from "@/lib/curriculum-engine";
+import { COMPANY_TRACKS, CAREER_LEVELS, getCompanyTrack, levelShortLabel } from "@/lib/curriculum-engine";
 import { useSettingsStore } from "@/stores/settings-store";
 
 export function CareerTrackSelector() {
@@ -11,9 +11,12 @@ export function CareerTrackSelector() {
     setCareerLevel,
   } = useSettingsStore();
 
+  const track = getCompanyTrack(companyTrack);
+  const levelLabelPrefix = track.levelScheme === "E" ? "E-level" : "Level";
+
   return (
     <>
-      <label className="settings-field">
+      <label className="settings-field settings-field-track">
         <span className="settings-label">Fluency track</span>
         <select
           value={companyTrack}
@@ -27,10 +30,13 @@ export function CareerTrackSelector() {
             </option>
           ))}
         </select>
+        {companyTrack !== "general" && (
+          <p className="track-interview-description">{track.interviewDescription}</p>
+        )}
       </label>
 
       <label className="settings-field">
-        <span className="settings-label">Level</span>
+        <span className="settings-label">{levelLabelPrefix}</span>
         <select
           value={careerLevel}
           onChange={(e) => setCareerLevel(e.target.value as typeof careerLevel)}
@@ -38,7 +44,7 @@ export function CareerTrackSelector() {
         >
           {CAREER_LEVELS.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.name} ({l.shortLabel})
+              {l.name} ({levelShortLabel(l.id, companyTrack)})
             </option>
           ))}
         </select>

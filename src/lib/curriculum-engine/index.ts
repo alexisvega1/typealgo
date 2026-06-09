@@ -7,6 +7,7 @@ export {
   recommendedTrainingMode,
   resolveSprintProfile,
   computeTrackReadiness,
+  levelShortLabel,
   formatCareerGoal,
 } from "./engine";
 export { applyTrackCoaching, trackSprintInsight } from "./coaching";

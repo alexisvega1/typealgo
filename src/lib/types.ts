@@ -424,6 +424,12 @@ export interface CompanyTrack {
   id: CompanyTrackId;
   name: string;
   tagline: string;
+  /** Verified 2026 interview-format summary for this track. */
+  interviewDescription: string;
+  /** Recommended practice language for this track's interview format. */
+  defaultLanguage: Language;
+  /** Level label scheme shown in the level selector (L-levels vs Meta E-levels). */
+  levelScheme: "L" | "E";
   cognitiveProfile: string;
   /** Probabilistic positioning — never implies company endorsement. */
   marketingLabel: string;
@@ -443,6 +449,8 @@ export interface CareerLevel {
   id: CareerLevelId;
   name: string;
   shortLabel: string;
+  /** Meta track E-level label (E3–E6); ignored when levelScheme is L. */
+  metaShortLabel: string;
   description: string;
   characteristics: string;
   fluencyLevelRange: [FluencyLevel, FluencyLevel];
