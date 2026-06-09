@@ -762,6 +762,45 @@ body {
   gap: 0.5rem;
 }
 
+.settings-field-language {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.375rem;
+}
+
+.track-language-hint {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--amber) 35%, var(--border));
+  background: color-mix(in srgb, var(--amber) 8%, var(--surface-2));
+}
+
+.track-language-hint p {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--foreground);
+}
+
+.track-language-hint-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.track-language-hint-dismiss:hover {
+  color: var(--foreground);
+}
+
 .settings-field-track {
   flex-direction: column;
   align-items: stretch;

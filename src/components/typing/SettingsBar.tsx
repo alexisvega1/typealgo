@@ -11,6 +11,7 @@ import { RECALL_INTENSITY_MODES } from "@/lib/training-mode";
 import { useSettingsStore } from "@/stores/settings-store";
 import { useUIStore } from "@/stores/ui-store";
 import { CareerTrackSelector } from "@/components/curriculum/CareerTrackSelector";
+import { TrackLanguageHint } from "@/components/curriculum/TrackLanguageHint";
 
 import type { RecallMode } from "@/lib/types";
 
@@ -70,7 +71,7 @@ export function SettingsBar() {
               </select>
             </label>
 
-            <label className="settings-field">
+            <label className="settings-field settings-field-language">
               <span className="settings-label">Language</span>
               <select
                 value={language}
@@ -83,6 +84,7 @@ export function SettingsBar() {
                   </option>
                 ))}
               </select>
+              <TrackLanguageHint />
             </label>
 
             <CareerTrackSelector />

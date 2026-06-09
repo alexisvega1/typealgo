@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getSiteURL } from "@/lib/supabase/config";
 
 const SUPABASE_CONFIGURED = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -13,8 +14,10 @@ export async function proxy(request: NextRequest) {
   // to our callback handler so the session exchange still runs.
   const code = url.searchParams.get("code");
   if (code && url.pathname !== "/auth/callback") {
-    const callback = url.clone();
-    callback.pathname = "/auth/callback";
+    const callback = new URL("/auth/callback", getSiteURL());
+    url.searchParams.forEach((value, key) => {
+      callback.searchParams.set(key, value);
+    });
     return NextResponse.redirect(callback);
   }
 

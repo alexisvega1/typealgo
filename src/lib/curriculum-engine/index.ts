@@ -11,3 +11,4 @@ export {
   formatCareerGoal,
 } from "./engine";
 export { applyTrackCoaching, trackSprintInsight } from "./coaching";
+export { trackLanguageHint, trackLanguageHintKey } from "./language-hints";

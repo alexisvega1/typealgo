@@ -1,5 +1,5 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { siteUrl } from "@/lib/supabase/config";
+import { getSiteURL } from "@/lib/supabase/config";
 import { mergeSettings, mergeUserStats } from "@/lib/sync/merge";
 import {
   CLOUD_PAYLOAD_VERSION,
@@ -140,7 +140,7 @@ export async function signInWithProvider(
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${siteUrl()}/auth/callback`,
+      redirectTo: `${getSiteURL()}/auth/callback`,
     },
   });
 

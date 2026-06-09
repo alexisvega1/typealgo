@@ -1,5 +1,5 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { siteUrl } from "@/lib/supabase/config";
+import { getSiteURL } from "@/lib/supabase/config";
 
 /**
  * Native "Sign in with Apple JS" popup flow.
@@ -145,7 +145,7 @@ export async function signInWithAppleNative(): Promise<{
   auth.init({
     clientId,
     scope: "name email",
-    redirectURI: `${siteUrl()}/auth/callback`,
+    redirectURI: `${getSiteURL()}/auth/callback`,
     usePopup: true,
     nonce,
   });
