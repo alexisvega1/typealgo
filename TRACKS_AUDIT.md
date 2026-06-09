@@ -155,4 +155,44 @@ Track `tagline` / `cognitiveProfile` shown on curriculum page; **not** shown in 
 
 ## CHANGES
 
-_(Updated in Phase 7.)_
+_(Completed June 2026 — company track alignment.)_
+
+### Phase 2 — Track metadata
+- Added `interviewDescription`, `defaultLanguage`, `levelScheme` to `CompanyTrack` (`src/lib/types.ts`, `src/lib/curriculum-engine/tracks.ts`).
+- Meta track uses **E3–E6+** labels via `metaShortLabel` on career levels; others use L-levels (`levelShortLabel()` in `engine.ts`).
+- Google track `languages` expanded to Python/Java/C++/JS for profile filtering.
+- UI: track description in filters panel + curriculum page (`CareerTrackSelector`, `CareerTracksPanel`).
+
+### Phase 3 — Language hints
+- Dismissible hints for Anthropic/OpenAI (non-Python) and Google (outside four allowed langs).
+- `TrackLanguageHint` in filters panel; dismissals persist per track+language key.
+
+### Phase 4 — Staged schema
+- `SnippetStage` type + `stagedSnippet()` helper (`src/lib/snippet-stages.ts`).
+- Backwards compatible: single-stage snippets unchanged; `code` mirrors stage 1.
+
+### Phase 5 — Staged content
+- Six new Python problems in `src/data/curriculum/staged-problems.ts` (3 Anthropic, 3 OpenAI).
+- `pickSnippet()` prefers staged problems on `anthropic` / `openai` tracks; classic pool fallback.
+- `TypingTest` advances stages on completion; `ProblemHeader` shows requirement header.
+
+### Phase 6 — Meta/Google notes
+- Meta/OpenAI/Anthropic/Google pack descriptions updated in `src/lib/content/packs.ts`.
+- **Skipped:** Google code-comprehension “planted bug” Review variant — would require new review content model beyond a small change.
+
+### Judgment calls
+- Meta **foundation/junior** both map to **E3** (Meta public leveling rarely distinguishes below E4).
+- Staged problems use **medium** difficulty and `interview-fluency` tier regardless of career level filter (profile filter still applies language).
+- Per-stage typing metrics recorded only on **final stage** completion (single `TypingResult` per problem).
+- Build verification: `tsc --noEmit` passes locally; `next build` requires Node ≥20 (environment had 18.x).
+
+### Files touched (summary)
+| Area | Key paths |
+|------|-----------|
+| Types | `src/lib/types.ts` |
+| Tracks/levels | `src/lib/curriculum-engine/tracks.ts`, `levels.ts`, `engine.ts`, `language-hints.ts` |
+| Staged schema | `src/lib/snippet-stages.ts`, `src/data/curriculum/builder.ts` |
+| Content | `src/data/curriculum/staged-problems.ts`, `index.ts` |
+| UI | `CareerTrackSelector.tsx`, `CareerTracksPanel.tsx`, `TrackLanguageHint.tsx`, `SettingsBar.tsx`, `TypingTest.tsx`, `ProblemHeader.tsx` |
+| Styles | `src/app/globals.css` (track hint, stage header — no dvh/safe-area regressions) |
+| Packs | `src/lib/content/packs.ts` |
