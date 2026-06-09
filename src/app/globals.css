@@ -756,6 +756,20 @@ body {
   font-size: 0.75rem;
 }
 
+.stage-requirement-header {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--accent);
+}
+
+.stage-requirement-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.6875rem;
+}
+
 .settings-field {
   display: flex;
   align-items: center;

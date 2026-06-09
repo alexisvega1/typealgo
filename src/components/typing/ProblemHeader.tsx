@@ -24,6 +24,8 @@ interface ProblemHeaderProps {
   recallMode?: RecallMode;
   companyTrack?: CompanyTrackId;
   careerLevel?: CareerLevelId;
+  stageRequirement?: string | null;
+  stageLabel?: string;
 }
 
 const DIFFICULTY_COLOR = {
@@ -40,6 +42,8 @@ export function ProblemHeader({
   recallMode,
   companyTrack = "general",
   careerLevel = "mid",
+  stageRequirement,
+  stageLabel,
 }: ProblemHeaderProps) {
   const pack = getPatternPack(snippet.pattern);
   const isMobileLayout = useIsMobileLayout();
@@ -70,6 +74,13 @@ export function ProblemHeader({
         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
         className="mx-auto max-w-4xl"
       >
+        {stageRequirement && (
+          <p className="stage-requirement-header">
+            {stageLabel ? <span className="stage-requirement-label">{stageLabel}</span> : null}
+            {stageLabel ? " · " : null}
+            {stageRequirement}
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <h1 className="text-base font-medium tracking-tight text-foreground sm:text-lg md:text-xl">
             {snippet.title}

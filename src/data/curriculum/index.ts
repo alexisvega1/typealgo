@@ -3,7 +3,9 @@ import { curriculumSnippetWeight, filterForProfile } from "@/lib/curriculum-engi
 import { CORE_REFLEX_SNIPPETS } from "./core-reflex";
 import { INTERVIEW_FLUENCY_SNIPPETS } from "./interview-fluency";
 import { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
+import { STAGED_SNIPPETS } from "./staged-problems";
 import { CURRICULUM_TIERS } from "./tiers";
+import { isStagedSnippet } from "@/lib/snippet-stages";
 
 export { PATTERN_PACKS, getPatternPack } from "./patterns";
 export { CURRICULUM_TIERS, getTierInfo } from "./tiers";
@@ -12,10 +14,13 @@ export { CORE_REFLEX_SNIPPETS } from "./core-reflex";
 export { INTERVIEW_FLUENCY_SNIPPETS } from "./interview-fluency";
 export { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
 
+export { STAGED_SNIPPETS } from "./staged-problems";
+
 export const SNIPPETS: Snippet[] = [
   ...CORE_REFLEX_SNIPPETS,
   ...INTERVIEW_FLUENCY_SNIPPETS,
   ...ADVANCED_FLUENCY_SNIPPETS,
+  ...STAGED_SNIPPETS,
 ];
 
 export const SNIPPET_BY_ID = new Map(SNIPPETS.map((s) => [s.id, s]));
@@ -94,6 +99,18 @@ export function resurfacingWeight(snippet: Snippet, results: TypingResult[]): nu
   return 0.5 + weakness * 1.5 + hesitationFactor * 0.8 + spacing;
 }
 
+const STAGED_TRACKS: CompanyTrackId[] = ["anthropic", "openai"];
+
+/** Prefer track-specific staged problems; fall back to classic snippets. */
+function applyTrackPoolPreference(pool: Snippet[], trackId: CompanyTrackId): Snippet[] {
+  if (!STAGED_TRACKS.includes(trackId)) return pool;
+  const packId = `company-${trackId}`;
+  const staged = pool.filter((s) => isStagedSnippet(s) && s.packIds?.includes(packId));
+  if (staged.length > 0) return staged;
+  const classic = pool.filter((s) => !isStagedSnippet(s));
+  return classic.length > 0 ? classic : pool;
+}
+
 export function pickSnippet(opts: PickOptions): Snippet {
   const trackId = opts.companyTrack ?? "general";
   const levelId = opts.careerLevel ?? "mid";
@@ -103,12 +120,14 @@ export function pickSnippet(opts: PickOptions): Snippet {
   ]);
   let pool = filterSnippets(opts).filter((s) => !excluded.has(s.id));
   pool = filterForProfile(pool, trackId, levelId);
+  pool = applyTrackPoolPreference(pool, trackId);
 
   if (pool.length === 0) {
     pool = filterSnippets({ ...opts, pattern: "all", difficulty: "all", tier: "all" }).filter(
       (s) => !excluded.has(s.id) && s.language === opts.language,
     );
     pool = filterForProfile(pool, trackId, levelId);
+    pool = applyTrackPoolPreference(pool, trackId);
   }
   if (pool.length === 0) pool = SNIPPETS.filter((s) => !excluded.has(s.id));
 

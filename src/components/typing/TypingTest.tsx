@@ -12,6 +12,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { playTypingClick } from "@/lib/typing-sound";
 import { pickSnippet } from "@/data/curriculum";
+import {
+  snippetStageCode,
+  snippetStageCount,
+  snippetStageLabel,
+  snippetStageRequirement,
+} from "@/lib/snippet-stages";
 import { useAppearanceStore } from "@/stores/appearance-store";
 import { shouldAutoCompletePair } from "@/lib/auto-pair";
 import { tokenizeCode } from "@/lib/tokenizer";
@@ -83,6 +89,8 @@ export function TypingTest() {
   const recordResult = useStatsStore((s) => s.recordResult);
 
   const [snippet, setSnippet] = useState<Snippet | null>(null);
+  const [stageIndex, setStageIndex] = useState(0);
+  const stageIndexRef = useRef(0);
   const [finished, setFinished] = useState(false);
   const [resultsDismissed, setResultsDismissed] = useState(false);
   const [liveWpm, setLiveWpm] = useState(0);
@@ -168,6 +176,66 @@ export function TypingTest() {
     });
   }, [finished, result, snippet, settings]);
 
+  const prepareSnippetStage = useCallback(
+    (next: Snippet, stage: number, results: ReturnType<typeof useStatsStore.getState>["results"]) => {
+      stageIndexRef.current = stage;
+      setStageIndex(stage);
+      const code = snippetStageCode(next, stage);
+      trainingModeRef.current = settings.trainingMode;
+      recallModeRef.current = effectiveRecallMode(
+        settings.trainingMode,
+        settings.recallMode,
+      );
+      indexRef.current = 0;
+      correctRef.current = 0;
+      incorrectRef.current = 0;
+      blankCorrectRef.current = 0;
+      blankIncorrectRef.current = 0;
+      revealsRef.current = 0;
+      startTimeRef.current = null;
+      lastKeyTimeRef.current = null;
+      keystrokesRef.current = [];
+      revealedRef.current = new Set();
+      tokensRef.current = tokenizeCode(code, next.language);
+      charLineMapRef.current = buildCharLineMap(tokensRef.current);
+
+      const prior = priorSnippetRecallStats(results, next.id);
+      const intensity = isSprintTraining(settings.trainingMode)
+        ? 1
+        : computeRecallIntensity({
+            fluencyLevel: next.fluencyLevel,
+            priorAccuracy: prior?.accuracy,
+            priorRecallAccuracy: prior?.recallAccuracy,
+          });
+      blankMaskRef.current = buildRecallPlan(
+        tokensRef.current,
+        code,
+        recallModeRef.current,
+        intensity,
+      ).blankMask;
+
+      if (deviceClassRef.current === "mobile-touch" && isRecallTraining(settings.trainingMode)) {
+        const mobileRecall =
+          recallModeRef.current === "skeleton" ? "skeleton" : "token-blank";
+        if (mobileRecall !== recallModeRef.current) {
+          recallModeRef.current = mobileRecall;
+          blankMaskRef.current = buildRecallPlan(
+            tokensRef.current,
+            code,
+            mobileRecall,
+            intensity,
+          ).blankMask;
+        }
+      }
+
+      charRefs.current = new Array(tokensRef.current.length).fill(null);
+      lineRefs.current = [];
+      activeLineRef.current = -1;
+      setTick((t) => t + 1);
+    },
+    [settings.trainingMode, settings.recallMode],
+  );
+
   const loadSnippet = useCallback(
     (excludeId?: string) => {
       const results = useStatsStore.getState().results;
@@ -183,11 +251,6 @@ export function TypingTest() {
         results,
       });
       snippetRef.current = next;
-      trainingModeRef.current = settings.trainingMode;
-      recallModeRef.current = effectiveRecallMode(
-        settings.trainingMode,
-        settings.recallMode,
-      );
       setSnippet(next);
       setFinished(false);
       finishedRef.current = false;
@@ -205,52 +268,7 @@ export function TypingTest() {
       setSprintCountdown(3);
       setSprintElapsed(0);
       setLiveMistakes(0);
-      indexRef.current = 0;
-      correctRef.current = 0;
-      incorrectRef.current = 0;
-      blankCorrectRef.current = 0;
-      blankIncorrectRef.current = 0;
-      revealsRef.current = 0;
-      startTimeRef.current = null;
-      lastKeyTimeRef.current = null;
-      keystrokesRef.current = [];
-      revealedRef.current = new Set();
-      tokensRef.current = tokenizeCode(next.code, next.language);
-      charLineMapRef.current = buildCharLineMap(tokensRef.current);
-
-      const prior = priorSnippetRecallStats(results, next.id);
-      const intensity = isSprintTraining(settings.trainingMode)
-        ? 1
-        : computeRecallIntensity({
-            fluencyLevel: next.fluencyLevel,
-            priorAccuracy: prior?.accuracy,
-            priorRecallAccuracy: prior?.recallAccuracy,
-          });
-      blankMaskRef.current = buildRecallPlan(
-        tokensRef.current,
-        next.code,
-        recallModeRef.current,
-        intensity,
-      ).blankMask;
-
-      if (deviceClassRef.current === "mobile-touch" && isRecallTraining(settings.trainingMode)) {
-        const mobileRecall =
-          recallModeRef.current === "skeleton" ? "skeleton" : "token-blank";
-        if (mobileRecall !== recallModeRef.current) {
-          recallModeRef.current = mobileRecall;
-          blankMaskRef.current = buildRecallPlan(
-            tokensRef.current,
-            next.code,
-            mobileRecall,
-            intensity,
-          ).blankMask;
-        }
-      }
-
-      charRefs.current = new Array(tokensRef.current.length).fill(null);
-      lineRefs.current = [];
-      activeLineRef.current = -1;
-      setTick((t) => t + 1);
+      prepareSnippetStage(next, 0, results);
     },
     [
       settings.patternPack,
@@ -260,8 +278,8 @@ export function TypingTest() {
       settings.companyTrack,
       settings.careerLevel,
       settings.adaptiveMode,
-      settings.recallMode,
       settings.trainingMode,
+      prepareSnippetStage,
     ],
   );
 
@@ -714,16 +732,30 @@ export function TypingTest() {
     if (finishedRef.current) return;
     const s = snippetRef.current;
     if (!s || !startTimeRef.current) return;
+
+    const totalStages = snippetStageCount(s);
+    if (stageIndexRef.current < totalStages - 1) {
+      finishedRef.current = false;
+      setFinished(false);
+      setStarted(false);
+      setLiveWpm(0);
+      setLiveAcc(100);
+      setLiveRecallAcc(100);
+      prepareSnippetStage(s, stageIndexRef.current + 1, useStatsStore.getState().results);
+      return;
+    }
+
     finishedRef.current = true;
     const durationMs = performance.now() - startTimeRef.current;
     const total = correctRef.current + incorrectRef.current;
+    const stageCode = snippetStageCode(s, stageIndexRef.current);
     const recallMetrics =
       isRecallTraining(trainingModeRef.current)
         ? computeRecallMetrics(
             keystrokesRef.current,
             blankMaskRef.current,
             revealsRef.current,
-            s.code,
+            stageCode,
           )
         : undefined;
     const wpm = calcWpm(correctRef.current, durationMs);
@@ -735,7 +767,7 @@ export function TypingTest() {
     const sprintMetrics = isSprintTraining(trainingModeRef.current)
       ? computeSprintMetrics(
           keystrokesRef.current,
-          s.code,
+          stageCode,
           accuracy,
           wpm,
           durationMs,
@@ -773,7 +805,7 @@ export function TypingTest() {
     } else {
       requestAnimationFrame(() => inputRef.current?.focus());
     }
-  }, [recordResult, dismissTypingKeyboard]);
+  }, [recordResult, dismissTypingKeyboard, prepareSnippetStage]);
 
   useEffect(() => {
     if (!finished || !isMobileLayout) return;
@@ -1061,6 +1093,8 @@ export function TypingTest() {
         recallMode={activeRecallMode}
         companyTrack={settings.companyTrack}
         careerLevel={settings.careerLevel}
+        stageRequirement={snippetStageRequirement(snippet, stageIndex)}
+        stageLabel={snippetStageLabel(snippet, stageIndex)}
       />
       <div
         className="typing-stage relative mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-6"
