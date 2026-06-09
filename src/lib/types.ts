@@ -101,6 +101,14 @@ export type SyntaxMotif =
 
 export type FluencyLevel = 1 | 2 | 3 | 4 | 5;
 
+/** One escalating gate in a multi-stage interview-style problem. */
+export interface SnippetStage {
+  id: string;
+  /** One-line new requirement shown when this stage begins. */
+  requirement: string;
+  code: string;
+}
+
 export interface Snippet {
   id: string;
   title: string;
@@ -121,6 +129,8 @@ export interface Snippet {
   variantOf?: string;
   /** Content packs this snippet belongs to (e.g. blind-75-track). */
   packIds?: string[];
+  /** Ordered stages for progressive system-building problems; `code` mirrors stage 1. */
+  stages?: SnippetStage[];
   /** Evidence-weighted associations — computed or curated override. */
   evidence?: SnippetEvidenceProfile;
 }
