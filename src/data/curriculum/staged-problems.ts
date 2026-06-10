@@ -667,4 +667,236 @@ class BoundedQueue:
       },
     ],
   }),
+
+  stagedSnippet({
+    id: "openai-retry-queue",
+    title: "Retry Queue with Dead Letter",
+    pattern: "stack",
+    difficulty: "medium",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 3,
+    motifs: ["deque-window"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["mid"],
+    sourceStyle: "OpenAI gate-style delivery queue with backoff and DLQ.",
+    description: "Message queue with exponential backoff and dead-letter routing.",
+    stages: [
+      {
+        id: "enqueue",
+        requirement: "Gate 1: enqueue(task_id) stores pending work in FIFO order.",
+        code: `from collections import deque
+
+class RetryQueue:
+    def __init__(self) -> None:
+        self._pending: deque[str] = deque()
+
+    def enqueue(self, task_id: str) -> None:
+        self._pending.append(task_id)
+
+    def pending_count(self) -> int:
+        return len(self._pending)
+`,
+      },
+      {
+        id: "backoff",
+        requirement: "Gate 2: record_failure(id) tracks attempt count per task.",
+        code: `from collections import deque
+
+class RetryQueue:
+    def __init__(self, max_attempts: int = 3) -> None:
+        self._pending: deque[str] = deque()
+        self._attempts: dict[str, int] = {}
+        self._max_attempts = max_attempts
+
+    def enqueue(self, task_id: str) -> None:
+        self._pending.append(task_id)
+        self._attempts.setdefault(task_id, 0)
+
+    def record_failure(self, task_id: str) -> int:
+        self._attempts[task_id] = self._attempts.get(task_id, 0) + 1
+        delay = 2 ** (self._attempts[task_id] - 1)
+        if self._attempts[task_id] < self._max_attempts:
+            self._pending.append(task_id)
+        return delay
+`,
+      },
+      {
+        id: "dlq",
+        requirement: "Gate 3: Tasks exceeding max attempts move to dead_letter().",
+        code: `from collections import deque
+
+class RetryQueue:
+    def __init__(self, max_attempts: int = 3) -> None:
+        self._pending: deque[str] = deque()
+        self._dead: list[str] = []
+        self._attempts: dict[str, int] = {}
+        self._max_attempts = max_attempts
+
+    def enqueue(self, task_id: str) -> None:
+        self._pending.append(task_id)
+        self._attempts.setdefault(task_id, 0)
+
+    def record_failure(self, task_id: str) -> int:
+        self._attempts[task_id] = self._attempts.get(task_id, 0) + 1
+        delay = 2 ** (self._attempts[task_id] - 1)
+        if self._attempts[task_id] >= self._max_attempts:
+            self._dead.append(task_id)
+        else:
+            self._pending.append(task_id)
+        return delay
+
+    def dead_letter(self) -> list[str]:
+        return list(self._dead)
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "openai-ip-iterator",
+    title: "IP Address Iterator",
+    pattern: "arrays",
+    difficulty: "medium",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 3,
+    motifs: ["enumerate-index"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["mid"],
+    sourceStyle: "OpenAI CIDR parse and lazy host iteration gates.",
+    description: "Expand CIDR blocks and iterate hosts lazily.",
+    stages: [
+      {
+        id: "parse",
+        requirement: "Gate 1: parse_cidr(cidr) returns (start_ip, host_count) as integers.",
+        code: `def parse_cidr(cidr: str) -> tuple[int, int]:
+    ip_part, prefix = cidr.split("/")
+    prefix_len = int(prefix)
+    octets = [int(x) for x in ip_part.split(".")]
+    start = (octets[0] << 24) + (octets[1] << 16) + (octets[2] << 8) + octets[3]
+    host_bits = 32 - prefix_len
+    host_count = 1 << host_bits
+    network = start & (~((1 << host_bits) - 1) if host_bits else 0)
+    return network, host_count
+`,
+      },
+      {
+        id: "lazy",
+        requirement: "Gate 2: IpIterator yields dotted-quad strings without storing the full range.",
+        code: `def parse_cidr(cidr: str) -> tuple[int, int]:
+    ip_part, prefix = cidr.split("/")
+    prefix_len = int(prefix)
+    octets = [int(x) for x in ip_part.split(".")]
+    start = (octets[0] << 24) + (octets[1] << 16) + (octets[2] << 8) + octets[3]
+    host_bits = 32 - prefix_len
+    host_count = 1 << host_bits
+    network = start & (~((1 << host_bits) - 1) if host_bits else 0)
+    return network, host_count
+
+def _format_ip(value: int) -> str:
+    return ".".join(str((value >> shift) & 255) for shift in (24, 16, 8, 0))
+
+class IpIterator:
+    def __init__(self, cidr: str) -> None:
+        self._start, self._count = parse_cidr(cidr)
+        self._index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> str:
+        if self._index >= self._count:
+            raise StopIteration
+        ip = self._start + self._index
+        self._index += 1
+        return _format_ip(ip)
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "openai-versioned-kv",
+    title: "Versioned Key-Value Store",
+    pattern: "hash-map",
+    difficulty: "hard",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 4,
+    motifs: ["hash-lookup"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["senior"],
+    sourceStyle: "OpenAI versioned KV with point-in-time read and rollback.",
+    description: "KV store with monotonic versions and rollback.",
+    stages: [
+      {
+        id: "versioned-set",
+        requirement: "Gate 1: set(key, value) returns a new global version number.",
+        code: `class VersionedKV:
+    def __init__(self) -> None:
+        self._version = 0
+        self._history: list[dict[str, str]] = [{}]
+
+    def set(self, key: str, value: str) -> int:
+        self._version += 1
+        snapshot = dict(self._history[-1])
+        snapshot[key] = value
+        self._history.append(snapshot)
+        return self._version
+`,
+      },
+      {
+        id: "get-at",
+        requirement: "Gate 2: get(key, version) reads the snapshot at that version.",
+        code: `class VersionedKV:
+    def __init__(self) -> None:
+        self._version = 0
+        self._history: list[dict[str, str]] = [{}]
+
+    def set(self, key: str, value: str) -> int:
+        self._version += 1
+        snapshot = dict(self._history[-1])
+        snapshot[key] = value
+        self._history.append(snapshot)
+        return self._version
+
+    def get(self, key: str, version: int) -> str | None:
+        if version < 0 or version >= len(self._history):
+            raise ValueError("invalid version")
+        return self._history[version].get(key)
+`,
+      },
+      {
+        id: "rollback",
+        requirement: "Gate 3: rollback(version) truncates history to that snapshot.",
+        code: `class VersionedKV:
+    def __init__(self) -> None:
+        self._version = 0
+        self._history: list[dict[str, str]] = [{}]
+
+    def set(self, key: str, value: str) -> int:
+        self._version += 1
+        snapshot = dict(self._history[-1])
+        snapshot[key] = value
+        self._history.append(snapshot)
+        return self._version
+
+    def get(self, key: str, version: int) -> str | None:
+        if version < 0 or version >= len(self._history):
+            raise ValueError("invalid version")
+        return self._history[version].get(key)
+
+    def rollback(self, version: int) -> None:
+        if version < 0 or version >= len(self._history):
+            raise ValueError("invalid version")
+        self._history = self._history[: version + 1]
+        self._version = version
+`,
+      },
+    ],
+  }),
 ];
