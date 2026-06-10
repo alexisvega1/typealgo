@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import {
   trackLanguageHint,
   trackLanguageHintKey,
@@ -10,26 +10,34 @@ import { useSettingsStore } from "@/stores/settings-store";
 
 const DISMISS_PREFIX = "typealgo-dismissed-lang-hint:";
 
+function readDismissedFromStorage(hintKey: string | null): boolean {
+  if (!hintKey) return true;
+  return safeLocalStorage.getItem(`${DISMISS_PREFIX}${hintKey}`) === "1";
+}
+
 export function TrackLanguageHint() {
   const companyTrack = useSettingsStore((s) => s.companyTrack);
   const language = useSettingsStore((s) => s.language);
-  const [dismissed, setDismissed] = useState(true);
+  const [sessionDismissedKey, setSessionDismissedKey] = useState<string | null>(
+    null,
+  );
 
   const hint = trackLanguageHint(companyTrack, language);
   const hintKey = hint ? trackLanguageHintKey(companyTrack, language) : null;
 
-  useEffect(() => {
-    if (!hintKey) {
-      setDismissed(true);
-      return;
-    }
-    setDismissed(safeLocalStorage.getItem(`${DISMISS_PREFIX}${hintKey}`) === "1");
-  }, [hintKey]);
+  const storageDismissed = useSyncExternalStore(
+    () => () => {},
+    () => readDismissedFromStorage(hintKey),
+    () => true,
+  );
+
+  const dismissed =
+    !hintKey || storageDismissed || sessionDismissedKey === hintKey;
 
   const dismiss = useCallback(() => {
     if (!hintKey) return;
     safeLocalStorage.setItem(`${DISMISS_PREFIX}${hintKey}`, "1");
-    setDismissed(true);
+    setSessionDismissedKey(hintKey);
   }, [hintKey]);
 
   if (!hint || dismissed) return null;
