@@ -5,6 +5,7 @@ import { INTERVIEW_FLUENCY_SNIPPETS } from "./interview-fluency";
 import { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
 import { STAGED_SNIPPETS } from "./staged-problems";
 import { GOOGLE_SNIPPETS } from "./company-google";
+import { DEEPMIND_SNIPPETS } from "./company-deepmind";
 import { CURRICULUM_TIERS } from "./tiers";
 import { isStagedSnippet } from "@/lib/snippet-stages";
 
@@ -17,6 +18,7 @@ export { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
 
 export { STAGED_SNIPPETS } from "./staged-problems";
 export { GOOGLE_SNIPPETS } from "./company-google";
+export { DEEPMIND_SNIPPETS } from "./company-deepmind";
 
 export const SNIPPETS: Snippet[] = [
   ...CORE_REFLEX_SNIPPETS,
@@ -24,6 +26,7 @@ export const SNIPPETS: Snippet[] = [
   ...ADVANCED_FLUENCY_SNIPPETS,
   ...STAGED_SNIPPETS,
   ...GOOGLE_SNIPPETS,
+  ...DEEPMIND_SNIPPETS,
 ];
 
 export const SNIPPET_BY_ID = new Map(SNIPPETS.map((s) => [s.id, s]));
