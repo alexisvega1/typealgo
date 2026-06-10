@@ -15,7 +15,6 @@ export function useAnimatedNumber(
   useEffect(() => {
     if (!enabled) {
       fromRef.current = value;
-      setDisplay(value);
       if (frameRef.current !== null) {
         cancelAnimationFrame(frameRef.current);
         frameRef.current = null;

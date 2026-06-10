@@ -179,7 +179,7 @@ export function TypingTest() {
       companyTrack: settings.companyTrack,
       careerLevel: settings.careerLevel,
     });
-  }, [finished, result, snippet, settings]);
+  }, [finished, result, snippet, settings, activeRecallMode]);
 
   const resetLiveMetrics = useCallback(() => {
     startTimeRef.current = null;

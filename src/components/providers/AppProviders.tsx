@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useCallback, useEffect, useRef } from "react";
 import type { User } from "@supabase/supabase-js";
 import { migrateLegacyStorageKeys } from "@/lib/migrate-storage";
 import { AppearanceApplier } from "@/components/settings/AppearanceApplier";
@@ -33,33 +33,39 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     migrateLegacyStorageKeys();
   }, []);
 
-  const runSync = async (userId: string) => {
-    if (syncing.current) return;
-    syncing.current = true;
-    setStatus("syncing");
+  const runSync = useCallback(
+    async (userId: string) => {
+      if (syncing.current) return;
+      syncing.current = true;
+      setStatus("syncing");
 
-    if (!navigator.onLine) {
-      setStatus("offline");
+      if (!navigator.onLine) {
+        setStatus("offline");
+        syncing.current = false;
+        return;
+      }
+
+      const result = await syncProgress(userId);
+      if (result.ok) {
+        markSynced();
+      } else {
+        setStatus("error", result.error);
+      }
       syncing.current = false;
-      return;
-    }
+    },
+    [markSynced, setStatus],
+  );
 
-    const result = await syncProgress(userId);
-    if (result.ok) {
-      markSynced();
-    } else {
-      setStatus("error", result.error);
-    }
-    syncing.current = false;
-  };
-
-  const queueSync = (userId: string | null) => {
-    if (!userId || !isSupabaseConfigured()) return;
-    if (syncTimer.current) clearTimeout(syncTimer.current);
-    syncTimer.current = setTimeout(() => {
-      void runSync(userId);
-    }, SYNC_DEBOUNCE_MS);
-  };
+  const queueSync = useCallback(
+    (userId: string | null) => {
+      if (!userId || !isSupabaseConfigured()) return;
+      if (syncTimer.current) clearTimeout(syncTimer.current);
+      syncTimer.current = setTimeout(() => {
+        void runSync(userId);
+      }, SYNC_DEBOUNCE_MS);
+    },
+    [runSync],
+  );
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
@@ -113,7 +119,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       window.removeEventListener("online", onOnline);
       if (syncTimer.current) clearTimeout(syncTimer.current);
     };
-  }, [markSynced, setStatus, setUser]);
+  }, [markSynced, queueSync, runSync, setStatus, setUser]);
 
   return (
     <>
