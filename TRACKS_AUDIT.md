@@ -250,6 +250,21 @@ Schema fields `levelRange`, `format`, `sourceStyle`, `buggyCode`, `plantedBugKin
 
 ## CHANGES
 
+### Run #4 — Anthropic + OpenAI L3 depth (local, not pushed)
+
+**Phase 1 — Anthropic L3 (+2 staged, 2 gates each):**
+- `anthropic-kv-basics` — set/get → delete (junior band; simpler than L4 `anthropic-kv-store`)
+- `anthropic-simple-lru` — OrderedDict recency → capacity eviction
+- **Dedup:** counter archetype skipped — `anthropic-counter-service` already at L3/junior
+
+**Phase 2 — OpenAI L3 (+2 staged, 2 gates each):**
+- `openai-iterator-protocol` — `__iter__`/`__next__` over range → list with StopIteration
+- `openai-fixed-window-limiter` — allow/deny → manual `reset()` (precursor to sliding limiter)
+
+**Inventory:** staged 18 → **22** · logical dedicated 51 → **55** · total rows **91** (incl. 36 Google mirrors)
+
+---
+
 ### Run #3 — Google multi-language mirrors (Phase 0 report)
 
 **Verdict: contained extension — proceeding without engine changes.**
@@ -262,7 +277,7 @@ multi-code payload on one snippet, no typing-engine fork.
 Convention: mirror ids use suffix `-java` / `-cpp` via `languageMirrorId()` in
 `src/data/curriculum/builder.ts`.
 
-**Phases 1–3 shipped (local, not pushed):**
+**Phases 1–3 shipped (pushed):**
 - +9 Java classic + 6 Java comprehension (`company-google-java.ts`, `company-google-comprehension-java.ts`)
 - +9 C++ classic + 6 C++ comprehension (`company-google-cpp.ts`, `company-google-comprehension-cpp.ts`)
 - Comprehension mirrors link to Python comprehension ids; classic mirrors link to Python classic ids

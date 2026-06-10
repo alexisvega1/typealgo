@@ -11,8 +11,8 @@ Living document for **what TypeAlgo still needs** vs what is shipped, ordered by
 **Ready-to-run authoring prompt:** [`docs/prep/AUTHORING_RUN.md`](./docs/prep/AUTHORING_RUN.md)  
 **Engine audit:** [`SEMANTIC_AUDIT.md`](./SEMANTIC_AUDIT.md)
 
-Last updated: June 2026 (run #3 complete — **87** dedicated seed rows; 51 logical + 36 language mirrors).  
-**Queued runs:** [`docs/prep/AUTHORING_RUN_3.md`](./docs/prep/AUTHORING_RUN_3.md) (L3 depth) · [`AUTHORING_RUN_4_LANDING.md`](./docs/prep/AUTHORING_RUN_4_LANDING.md) (hero — blocked)
+Last updated: June 2026 (run #4 complete — **91** dedicated seed rows; 55 logical + 36 language mirrors).  
+**Queued runs:** [`AUTHORING_RUN_4_LANDING.md`](./docs/prep/AUTHORING_RUN_4_LANDING.md) (hero — blocked)
 
 ---
 
@@ -20,29 +20,31 @@ Last updated: June 2026 (run #3 complete — **87** dedicated seed rows; 51 logi
 
 | Pool | Run #1 min | Shipped | Notes |
 |------|------------|---------|-------|
-| Anthropic staged | 6 | **9** | +3 canonical (crawler, producer-consumer, DAG) |
-| OpenAI staged | 6 | **9** | +3 canonical (webhook, dedup, staged LRU) |
+| Anthropic staged | 6 | **11** | +2 L3 (run #4: KV basics, simple LRU) |
+| OpenAI staged | 6 | **11** | +2 L3 (run #4: iterator protocol, fixed-window limiter) |
 | Google classic | 9 | **27** | 9 Python + 9 Java + 9 C++ mirrors |
 | Google comprehension | — | **18** | 6 × 3 langs (run #2 + #3 mirrors) |
 | DeepMind | 9 | **9** | unchanged |
 | Meta classic | 9 | **9** | unchanged |
-| **Total dedicated seeds** | **39** | **87** | 51 logical + 36 mirror rows |
+| **Total dedicated seeds** | **39** | **91** | 55 logical + 36 mirror rows |
 
-**Staged pool:** 18/18 · **Classic dedicated:** 27/27 · **Comprehension:** 18/18 (6 logical × 3 langs)
+**Staged pool:** 22/22 · **Classic dedicated:** 27/27 · **Comprehension:** 18/18 (6 logical × 3 langs)
 
 ---
 
 ## Shipped (do not re-author)
 
-### Anthropic staged (9)
+### Anthropic staged (11)
 
 Run #1 (6): KV store · rate limiter · config store · event log · counter · bounded queue  
-Run #2 (+3): concurrent crawler · producer-consumer buffer · DAG scheduler
+Run #2 (+3): concurrent crawler · producer-consumer buffer · DAG scheduler  
+Run #4 (+2 L3): KV basics (`anthropic-kv-basics`) · simple LRU (`anthropic-simple-lru`) — counter skipped (`anthropic-counter-service` already at L3)
 
-### OpenAI staged (9)
+### OpenAI staged (11)
 
 Run #1 (6): timed KV · resumable iterator · sliding rate limiter · retry queue · IP iterator · versioned KV  
-Run #2 (+3): webhook delivery queue · stream deduplicator · LRU staged build (`openai-lru-cache-staged`)
+Run #2 (+3): webhook delivery queue · stream deduplicator · LRU staged build (`openai-lru-cache-staged`)  
+Run #4 (+2 L3): iterator protocol (`openai-iterator-protocol`) · fixed-window limiter (`openai-fixed-window-limiter`)
 
 **Note:** `openai-lru-cache-staged` pairs with `google-lru-cache` classic — different formats, not duplicates.
 
