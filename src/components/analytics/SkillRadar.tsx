@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "recharts";
 import { getPatternPack } from "@/data/curriculum";
+import { useClientMounted } from "@/lib/use-client-mounted";
 import { aggregatePatternStats } from "@/lib/metrics";
 import type { Pattern } from "@/lib/types";
 import { useStatsStore } from "@/stores/stats-store";
@@ -76,6 +77,7 @@ function RadarAxisTick(props: RadarTickProps) {
 }
 
 export function SkillRadar() {
+  const mounted = useClientMounted();
   const results = useStatsStore((s) => s.results);
 
   const data = useMemo(() => {
@@ -104,50 +106,52 @@ export function SkillRadar() {
       <p className="card-subtitle">Algorithmic recall by pattern pack</p>
 
       <div className="chart-radar-shell mt-4">
-        <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={260}>
-          <RadarChart
-            data={data}
-            cx="50%"
-            cy="50%"
-            outerRadius="62%"
-            margin={{ top: 12, right: 28, bottom: 12, left: 28 }}
-          >
-            <PolarGrid stroke="#2a2a2e" gridType="polygon" />
-            <PolarAngleAxis
-              dataKey="pattern"
-              tick={(props) => <RadarAxisTick {...props} />}
-              tickLine={false}
-            />
-            <PolarRadiusAxis
-              angle={90}
-              domain={[0, 100]}
-              tickCount={5}
-              tick={{ fill: "#52525b", fontSize: 9 }}
-              axisLine={false}
-            />
-            <Tooltip
-              contentStyle={{
-                background: "#18181b",
-                border: "1px solid #27272a",
-                borderRadius: 8,
-                fontSize: 12,
-              }}
-              labelFormatter={(_, payload) =>
-                (payload?.[0]?.payload as { patternFull?: string })?.patternFull ?? ""
-              }
-              formatter={(value) => [`${value}`, "Fluency"]}
-            />
-            <Radar
-              name="Fluency"
-              dataKey="score"
-              stroke="#e2b714"
-              fill="#e2b714"
-              fillOpacity={hasData ? 0.25 : 0.05}
-              strokeWidth={2}
-              dot={hasData ? { fill: "#e2b714", r: 3 } : false}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
+        {mounted ? (
+          <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={260}>
+            <RadarChart
+              data={data}
+              cx="50%"
+              cy="50%"
+              outerRadius="62%"
+              margin={{ top: 12, right: 28, bottom: 12, left: 28 }}
+            >
+              <PolarGrid stroke="#2a2a2e" gridType="polygon" />
+              <PolarAngleAxis
+                dataKey="pattern"
+                tick={(props) => <RadarAxisTick {...props} />}
+                tickLine={false}
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                tickCount={5}
+                tick={{ fill: "#52525b", fontSize: 9 }}
+                axisLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "#18181b",
+                  border: "1px solid #27272a",
+                  borderRadius: 8,
+                  fontSize: 12,
+                }}
+                labelFormatter={(_, payload) =>
+                  (payload?.[0]?.payload as { patternFull?: string })?.patternFull ?? ""
+                }
+                formatter={(value) => [`${value}`, "Fluency"]}
+              />
+              <Radar
+                name="Fluency"
+                dataKey="score"
+                stroke="#e2b714"
+                fill="#e2b714"
+                fillOpacity={hasData ? 0.25 : 0.05}
+                strokeWidth={2}
+                dot={hasData ? { fill: "#e2b714", r: 3 } : false}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        ) : null}
       </div>
 
       {!hasData && (

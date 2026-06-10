@@ -1,25 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 export function AuthErrorBanner() {
   const searchParams = useSearchParams();
-  const [message, setMessage] = useState<string | null>(null);
+  const authError = searchParams.get("auth_error");
+  const [dismissedError, setDismissedError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const authError = searchParams.get("auth_error");
-    if (authError) {
-      setMessage(authError);
-    }
-  }, [searchParams]);
+  const message =
+    authError && dismissedError !== authError ? authError : null;
 
   const dismiss = useCallback(() => {
-    setMessage(null);
+    if (!authError) return;
+    setDismissedError(authError);
     const url = new URL(window.location.href);
     url.searchParams.delete("auth_error");
     window.history.replaceState({}, "", url.pathname + url.search);
-  }, []);
+  }, [authError]);
 
   if (!message) return null;
 
