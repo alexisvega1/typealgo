@@ -153,6 +153,39 @@ Track `tagline` / `cognitiveProfile` shown on curriculum page; **not** shown in 
 - DeepMind AI-prohibition angle not in copy
 - Dedicated anthropic/openai content packs planned but empty
 
+## Content authority
+
+**WHAT to author:** [`TRACKS_CONTENT_SPEC.md`](./TRACKS_CONTENT_SPEC.md) — company track × level archetypes, seed quantities, quality gate. When the build phases and this spec conflict, **this spec wins on content decisions**.
+
+---
+
+## Seed inventory (vs minimum viable)
+
+| Track | Spec minimum | Shipped | Gap |
+|-------|-------------|---------|-----|
+| Anthropic | 6 staged | 3 staged | 3 (L3 LRU/counter; L4 event log; L5 concurrency) |
+| OpenAI | 6 staged | 3 staged | 3 (L3 iterator; L4 IP iterator; L5 versioned KV / webhook) |
+| Google | 9 classic | 0 dedicated | 9 (evidence-weighted classic pool only today) |
+| Meta | 9 classic | 0 dedicated | 9 (evidence-weighted classic pool only today) |
+| DeepMind | 9 (6+3 ML) | 0 dedicated | 9 (evidence-weighted classic pool only today) |
+
+Schema fields `level_range`, `format`, `source_style` from the content spec are **not yet on `Snippet`** — staged problems use `packIds` + implicit L4 band. Follow-up: extend metadata per spec before the “double each track” pass.
+
+### Shipped seed log (Phase 5 — pre-spec review)
+
+| Name | Track | Level | Format | Stages | Rationale |
+|------|-------|-------|--------|--------|-----------|
+| In-Memory KV Store | anthropic | L4 (mid) | staged | 3 | Canonical Anthropic KV → sorted keys → TTL escalation |
+| Token Bucket Rate Limiter | anthropic | L4 | staged | 2 | Fixed-window allow → retry-after (partial sliding path) |
+| File-Backed Config Store | anthropic | L4 | staged | 2 | Load key=value → required-key validation |
+| Time-Based Key-Value Store | openai | L4 | staged | 3 | Timestamped set/get → delete → absent-key edge case |
+| Resumable Iterator | openai | L4 | staged | 2 | Iterate → checkpoint/resume |
+| Sliding-Window Rate Limiter | openai | L4 | staged | 2 | Sliding allow → remaining slots |
+
+**Review notes:** Stage headers should be tightened to spec voice (“Now expire keys after a TTL.”). Meta E4 archetypes need original phrasing spot-check when authored. Quantities are minimum-viable — a “double each track” pass is the natural follow-up after quality review.
+
+---
+
 ## CHANGES
 
 _(Completed June 2026 — company track alignment.)_
