@@ -176,10 +176,28 @@ export function TypingTest() {
     });
   }, [finished, result, snippet, settings]);
 
+  const resetLiveMetrics = useCallback(() => {
+    startTimeRef.current = null;
+    lastKeyTimeRef.current = null;
+    correctRef.current = 0;
+    incorrectRef.current = 0;
+    blankCorrectRef.current = 0;
+    blankIncorrectRef.current = 0;
+    revealsRef.current = 0;
+    keystrokesRef.current = [];
+    setStarted(false);
+    setLiveWpm(0);
+    setLiveAcc(100);
+    setLiveRecallAcc(100);
+    setConfidenceScore(100);
+    setLiveMistakes(0);
+  }, []);
+
   const prepareSnippetStage = useCallback(
     (next: Snippet, stage: number, results: ReturnType<typeof useStatsStore.getState>["results"]) => {
       stageIndexRef.current = stage;
       setStageIndex(stage);
+      resetLiveMetrics();
       const code = snippetStageCode(next, stage);
       trainingModeRef.current = settings.trainingMode;
       recallModeRef.current = effectiveRecallMode(
@@ -187,14 +205,6 @@ export function TypingTest() {
         settings.recallMode,
       );
       indexRef.current = 0;
-      correctRef.current = 0;
-      incorrectRef.current = 0;
-      blankCorrectRef.current = 0;
-      blankIncorrectRef.current = 0;
-      revealsRef.current = 0;
-      startTimeRef.current = null;
-      lastKeyTimeRef.current = null;
-      keystrokesRef.current = [];
       revealedRef.current = new Set();
       tokensRef.current = tokenizeCode(code, next.language);
       charLineMapRef.current = buildCharLineMap(tokensRef.current);
@@ -233,7 +243,7 @@ export function TypingTest() {
       activeLineRef.current = -1;
       setTick((t) => t + 1);
     },
-    [settings.trainingMode, settings.recallMode],
+    [settings.trainingMode, settings.recallMode, resetLiveMetrics],
   );
 
   const loadSnippet = useCallback(
@@ -256,18 +266,12 @@ export function TypingTest() {
       finishedRef.current = false;
       setResultsDismissed(false);
       setResult(null);
-      setStarted(false);
-      setLiveWpm(0);
-      setLiveAcc(100);
-      setLiveRecallAcc(100);
-      setConfidenceScore(100);
       setShowRevealHint(false);
       setReviewLine(0);
       setReviewMotif(null);
       setSprintPhase(isSprintTraining(settings.trainingMode) ? "idle" : "active");
       setSprintCountdown(3);
       setSprintElapsed(0);
-      setLiveMistakes(0);
       prepareSnippetStage(next, 0, results);
     },
     [
@@ -737,10 +741,6 @@ export function TypingTest() {
     if (stageIndexRef.current < totalStages - 1) {
       finishedRef.current = false;
       setFinished(false);
-      setStarted(false);
-      setLiveWpm(0);
-      setLiveAcc(100);
-      setLiveRecallAcc(100);
       prepareSnippetStage(s, stageIndexRef.current + 1, useStatsStore.getState().results);
       return;
     }
@@ -1104,6 +1104,7 @@ export function TypingTest() {
       >
         {typingEnabled && !isSprintMode && (
           <LiveStats
+            key={`${snippet.id}-${tick}`}
             wpm={liveWpm}
             accuracy={liveAcc}
             started={started}

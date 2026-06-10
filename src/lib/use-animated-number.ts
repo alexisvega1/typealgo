@@ -13,8 +13,15 @@ export function useAnimatedNumber(
   const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
-    fromRef.current = enabled ? fromRef.current : value;
-    if (!enabled) return;
+    if (!enabled) {
+      fromRef.current = value;
+      setDisplay(value);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+      return;
+    }
 
     const from = fromRef.current;
     const to = value;
