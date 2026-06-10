@@ -12,7 +12,7 @@ Living document for **what TypeAlgo still needs** vs what is shipped, ordered by
 **Engine audit:** [`SEMANTIC_AUDIT.md`](./SEMANTIC_AUDIT.md)
 
 Last updated: June 2026 (run #4 complete — **91** dedicated seed rows; 55 logical + 36 language mirrors).  
-**Queued runs:** [`AUTHORING_RUN_4_LANDING.md`](./docs/prep/AUTHORING_RUN_4_LANDING.md) (hero — blocked)
+**Queued runs:** [`AUTHORING_RUN_4_LANDING.md`](./docs/prep/AUTHORING_RUN_4_LANDING.md) (hero — **ready**, watch-it design run; Phase 1 stop-gate)
 
 ---
 
