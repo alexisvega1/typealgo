@@ -169,15 +169,34 @@ Track `tagline` / `cognitiveProfile` shown on curriculum page; **not** shown in 
 
 | Track | Spec minimum | Shipped | Gap |
 |-------|-------------|---------|-----|
-| Anthropic | 6 staged | **6 staged** | 0 |
-| OpenAI | 6 staged | **6 staged** | 0 |
-| Google | 9 classic | **9 classic** | 0 |
+| Anthropic | 6 staged (+ canonical) | **9 staged** | 0 |
+| OpenAI | 6 staged (+ canonical) | **9 staged** | 0 |
+| Google | 9 classic + comprehension | **9 classic + 6 comprehension** | 0 |
 | DeepMind | 9 (6+3 ML) | **9** | 0 |
 | Meta | 9 classic | **9 classic** | 0 |
 
-Schema fields `levelRange`, `format`, `sourceStyle` are on `Snippet` (Phase 0, commit `eaeb22b`). Staged problems carry `packIds`, `tracks`, and metadata.
+Schema fields `levelRange`, `format`, `sourceStyle`, `buggyCode`, `plantedBugKind` on `Snippet`. Comprehension format uses read-only buggy context + corrected typing target (run #2, commit `34483d6`).
 
-### Shipped seed log (June 2026 local authoring run)
+### Shipped seed log — run #2 (canonical builds + comprehension, June 2026)
+
+| Name | Track | Level | Format | Stages | Rationale |
+|------|-------|-------|--------|--------|-----------|
+| Concurrent Web Crawler | anthropic | L5 | staged | 3 | fetch/parse → politeness lock → visited dedup |
+| Producer-Consumer Buffer | anthropic | L5 | staged | 2 | Lock/Condition buffer → asyncio.Queue |
+| Job DAG Scheduler | anthropic | L4 | staged | 3 | run single → topo run_all → cycle detect |
+| Webhook Delivery Queue | openai | L5 | staged | 3 | schedule → backoff → idempotency keys |
+| Memory-Bounded Stream Deduplicator | openai | L4 | staged | 2 | seen-set → bounded eviction |
+| LRU Cache (Staged Build) | openai | L4 | staged | 2 | capacity LRU → thread-safe; pairs with `google-lru-cache` classic |
+| Fix: Merge Two Sorted Arrays | google | L3 | comprehension | 1 | off-by-one trailing slice (`i+1` bug) |
+| Fix: Grid Shortest Path | google | L3 | comprehension | 1 | missing visited check before enqueue |
+| Fix: Topological Sort | google | L4 | comprehension | 1 | wrong in-degree decrement target |
+| Fix: Merge Overlapping Intervals | google | L4 | comprehension | 1 | off-by-one overlap (`<` vs `<=`) |
+| Fix: Edit Distance | google | L5 | comprehension | 1 | wrong base case `dp[i][0] = i - 1` |
+| Fix: LRU Cache Class | google | L5 | comprehension | 1 | inverted eviction `popitem(last=True)` |
+
+**Run #2 totals:** 18/18 staged · 6/6 comprehension · multi-language Google mirrors still deferred
+
+### Shipped seed log — run #1 (minimum viable, June 2026)
 
 | Name | Track | Level | Format | Stages | Rationale |
 |------|-------|-------|--------|--------|-----------|
@@ -221,15 +240,33 @@ Schema fields `levelRange`, `format`, `sourceStyle` are on `Snippet` (Phase 0, c
 | Maximum Path Sum in Binary Tree | meta | E5 | classic | 1 | Post-order gain with global best |
 | Insert Operators to Reach Target | meta | E5 | classic | 1 | DFS over digit splits with +/− |
 
-**Totals:** 12/12 staged · 27/27 classic dedicated · **39/39 minimum viable**
+**Totals (run #1):** 12/12 staged · 27/27 classic dedicated · **39/39 minimum viable**
 
-**Review notes:** Stage headers may be tightened to spec voice in a follow-up polish pass. Google comprehension variants and multi-language mirrors remain deferred.
+**Combined inventory:** 18 staged · 27 classic · 6 comprehension · **51 dedicated seeds**
+
+**Review notes:** Stage headers may be tightened to spec voice in a follow-up polish pass. Google multi-language mirrors remain deferred. `openai-lru-cache-staged` and `google-lru-cache` are intentional pairs (staged build vs classic one-shot).
 
 ---
 
 ## CHANGES
 
-_(Completed June 2026 — company track alignment.)_
+### Run #2 — Comprehension format + canonical builds (June 2026, local)
+
+**Phase 0 — Comprehension format (contained; no typing-engine fork):**
+- Added `buggyCode`, `plantedBugKind` to `Snippet`; `comprehensionSnippet()` helper.
+- `ComprehensionBugContext` read-only panel above typing area; corrected `code` remains typing target.
+- No changes to `typeChar`, stage advancement, or metrics pipeline.
+
+**Phases 1–3 — Content:**
+- +3 Anthropic staged (crawler, producer-consumer, DAG scheduler).
+- +3 OpenAI staged (webhook queue, stream dedup, staged LRU).
+- +6 Google comprehension variants in `company-google-comprehension.ts`.
+
+**Deferred:** Google multi-language mirrors (Java/C++/JS).
+
+---
+
+_(Completed June 2026 — company track alignment, run #1.)_
 
 ### Phase 2 — Track metadata
 - Added `interviewDescription`, `defaultLanguage`, `levelScheme` to `CompanyTrack` (`src/lib/types.ts`, `src/lib/curriculum-engine/tracks.ts`).

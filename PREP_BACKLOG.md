@@ -11,50 +11,39 @@ Living document for **what TypeAlgo still needs** vs what is shipped, ordered by
 **Ready-to-run authoring prompt:** [`docs/prep/AUTHORING_RUN.md`](./docs/prep/AUTHORING_RUN.md)  
 **Engine audit:** [`SEMANTIC_AUDIT.md`](./SEMANTIC_AUDIT.md)
 
-Last updated: June 2026 (local authoring run complete — **39/39** dedicated seeds).
+Last updated: June 2026 (run #2 complete — **51** dedicated seeds).
 
 ---
 
 ## Quick scan — totals
 
-| Pool | Spec min | Shipped | Absent | Your priority |
-|------|----------|---------|--------|---------------|
-| Anthropic staged | 6 | **6** | 0 | **P0** — complete |
-| OpenAI staged | 6 | **6** | 0 | **P1** — complete |
-| Google classic | 9 | **9** | 0 | **P2** — complete |
-| DeepMind | 9 (6+3 ML) | **9** | 0 | **P2** — complete |
-| Meta classic | 9 | **9** | 0 | **P3** — complete |
-| **Total dedicated seeds** | **39** | **39** | **0** | |
+| Pool | Run #1 min | Shipped | Notes |
+|------|------------|---------|-------|
+| Anthropic staged | 6 | **9** | +3 canonical (crawler, producer-consumer, DAG) |
+| OpenAI staged | 6 | **9** | +3 canonical (webhook, dedup, staged LRU) |
+| Google classic | 9 | **9** | unchanged |
+| Google comprehension | — | **6** | new format (run #2) |
+| DeepMind | 9 | **9** | unchanged |
+| Meta classic | 9 | **9** | unchanged |
+| **Total dedicated seeds** | **39** | **51** | |
 
-General Fluency (~85 classic snippets) is unchanged — company tracks add **dedicated** seeds on top.
-
-**Staged pool:** 12/12 · **Classic dedicated pool:** 27/27
+**Staged pool:** 18/18 · **Classic dedicated:** 27/27 · **Comprehension:** 6/6
 
 ---
 
 ## Shipped (do not re-author)
 
-### Anthropic staged (6)
+### Anthropic staged (9)
 
-| Name | Level | Stages | ID |
-|------|-------|--------|-----|
-| In-Memory KV Store | L4 | 3 | `anthropic-kv-store` |
-| Token Bucket Rate Limiter | L4 | 2 | `anthropic-rate-limiter` |
-| File-Backed Config Store | L4 | 2 | `anthropic-config-store` |
-| Append-Only Event Log | L4 | 3 | `anthropic-event-log` |
-| Windowed Counter Service | L3 | 2 | `anthropic-counter-service` |
-| Thread-Safe Bounded Queue | L5 | 3 | `anthropic-bounded-queue` |
+Run #1 (6): KV store · rate limiter · config store · event log · counter · bounded queue  
+Run #2 (+3): concurrent crawler · producer-consumer buffer · DAG scheduler
 
-### OpenAI staged (6)
+### OpenAI staged (9)
 
-| Name | Level | Stages | ID |
-|------|-------|--------|-----|
-| Time-Based Key-Value Store | L4 | 3 | `openai-timed-kv` |
-| Resumable Iterator | L4 | 2 | `openai-resumable-iterator` |
-| Sliding-Window Rate Limiter | L4 | 2 | `openai-sliding-rate-limiter` |
-| Retry Queue with Dead Letter | L4 | 3 | `openai-retry-queue` |
-| IP Address Iterator | L4 | 2 | `openai-ip-iterator` |
-| Versioned Key-Value Store | L5 | 3 | `openai-versioned-kv` |
+Run #1 (6): timed KV · resumable iterator · sliding rate limiter · retry queue · IP iterator · versioned KV  
+Run #2 (+3): webhook delivery queue · stream deduplicator · LRU staged build (`openai-lru-cache-staged`)
+
+**Note:** `openai-lru-cache-staged` pairs with `google-lru-cache` classic — different formats, not duplicates.
 
 ### Google classic (9) — `company-google.ts`
 
@@ -62,26 +51,29 @@ L3: merge sorted · grid BFS · binary search on capacity
 L4: topological sort · merge intervals · task scheduler  
 L5: edit distance · trie · LRU cache class
 
-### DeepMind (9) — `company-deepmind.ts`
+### Google comprehension (6) — `company-google-comprehension.ts`
 
-Classic: DFS components · kth largest heap · first bad version · running median · stream anomaly · matrix path sum  
-ML L5: stable softmax · k-means step · attention scores
+L3: fix merge sorted · fix grid BFS  
+L4: fix topo sort · fix merge intervals  
+L5: fix edit distance · fix LRU eviction
 
-### Meta classic (9) — `company-meta.ts`
+Each links to a classic via `variantOf`.
 
-E3: balanced brackets · two-sum indices · rolling average  
-E4: k closest points · subarray sum k · LCA  
-E5: merge k lists · tree max path · add operators
+### DeepMind (9) · Meta classic (9)
+
+Unchanged from run #1 — see [`TRACKS_AUDIT.md`](./TRACKS_AUDIT.md).
 
 ---
 
-## Absent — prioritized queue
+## Absent — next optional passes
 
-**None.** Minimum viable seed inventory is complete. Next passes (optional):
+| Item | Status |
+|------|--------|
+| Google multi-language mirrors (Java/C++/JS) | **Deferred** |
+| Double-each-track quality expansion | Optional after human review |
+| Stage header voice polish | Optional |
 
-- Google multi-language mirrors (Java/C++/JS per spec)
-- Google comprehension “planted bug” variants (needs review content model)
-- Double-each-track quality expansion after human review
+**Canonical prep-doc builds now shipped:** concurrent crawler · webhook/DLQ path · DAG scheduler · comprehension round · producer-consumer · stream dedup · staged LRU.
 
 ---
 
@@ -89,62 +81,24 @@ E5: merge k lists · tree max path · add operators
 
 | Blocker | Status | Notes |
 |---------|--------|-------|
-| Schema: `level_range`, `format`, `source_style` on `Snippet` | **Shipped** | Phase 0; 6 original staged backfilled |
-| Meta E-levels in data model | Partial | UI uses E-labels; snippets use `levelRange` career IDs |
-| Google multi-language seeds | Deferred | Spec allows 4 langs; Python pool shipped |
-
----
-
-## What prep docs cover that TypeAlgo does *not*
-
-Use the **prompt library** for these — they will not become typing snippets.
-
-| Tier | Examples | Where to practice |
-|------|----------|-------------------|
-| System design | Batch LLM eval, Connectomics ingestion, fault tolerance | `docs/prep/Interview-Prep-Prompt-Library-v2-revised.md` §4 |
-| Values / behavioral | RSP, Constitutional AI, honesty-ledger STAR | Same, §3 |
-| Technical deep dive | FFN/connectomics reverse system design | Same, §2E + §6 Google bridge |
-| Concurrency oral | threads / processes / async / GIL | Same, §3 quiz prompt |
-
-Typing prep for the Anthropic/OpenAI loops is covered by staged seeds; the bottleneck shifts to **mock reps**, not seeds.
-
----
-
-## How to queue problems from new prep materials
-
-When you get updated Claude/ChatGPT prep docs or candidate reports:
-
-1. **Extract coding/build mentions only** — ignore loop-structure claims unless tagged [A] official.
-2. **Map to an archetype** using the taxonomy in [`docs/prep/Anthropic-OpenAI-Interview-Prep-2026-revised.md`](./docs/prep/Anthropic-OpenAI-Interview-Prep-2026-revised.md) (§3–4 drill lists).
-3. **Check this file** — if archetype is already shipped, skip; if absent, add a row under the right priority bucket with a one-line `Prep doc anchor`.
-4. **Check overlap** — many Anthropic/OpenAI problems share shapes (rate limiter, retry/DLQ, KV); prefer **one staged implementation per shape** before duplicating.
-5. **Author via** [`docs/prep/AUTHORING_RUN.md`](./docs/prep/AUTHORING_RUN.md) — do not ad-hoc seeds outside spec + quality gate.
-6. **Log ship** in `TRACKS_AUDIT.md` seed table; update counts in this file's Quick scan table.
-
-### Archetype → track routing (cheat sheet)
-
-| If prep doc says… | TypeAlgo track | Format |
-|-------------------|----------------|--------|
-| Multi-tier / production / concurrency | Anthropic | staged |
-| Rebuild class / gate / test-driven component | OpenAI | staged |
-| LeetCode-medium speed / classic DSA | Google or Meta | classic |
-| ML primitive from scratch | DeepMind L5 | classic |
-| Connectomics QC / volume pipeline | Prompt library + deep dive | not TypeAlgo |
+| Comprehension format engine path | **Shipped** | Run #2 Phase 0 — display panel only |
+| Schema: `buggyCode`, `plantedBugKind` | **Shipped** | On `Snippet` |
+| Google multi-language seeds | Deferred | Python pool + comprehension shipped |
 
 ---
 
 ## Cross-reference: prep doc canonical builds
 
-| Archetype | Anthropic prep | OpenAI prep | TypeAlgo |
-|-----------|----------------|-------------|----------|
-| Time-based KV | Week 1 | §4 practical | **Shipped** |
-| Resumable iterator | — | §4 practical | **Shipped** |
-| Sliding-window rate limiter | drill list | spec L4 | **Shipped** |
-| Retry + DLQ | drill list | §4 practical | **Shipped** |
-| Thread-safe bounded queue | drill list | — | **Shipped** |
-| IP/CIDR iterator | — | spec L4 | **Shipped** |
-| Event log with replay | spec L4 | — | **Shipped** |
-| Versioned KV / rollback | — | spec L5 | **Shipped** |
+| Archetype | TypeAlgo |
+|-----------|----------|
+| Concurrent crawler | **Shipped** (`anthropic-concurrent-crawler`) |
+| Producer-consumer / bounded buffer | **Shipped** (`anthropic-producer-consumer`) |
+| Job DAG scheduler | **Shipped** (`anthropic-dag-scheduler`) |
+| Webhook delivery + idempotency | **Shipped** (`openai-webhook-delivery`) |
+| Memory-bounded stream dedup | **Shipped** (`openai-stream-deduplicator`) |
+| Staged LRU (OpenAI gate build) | **Shipped** (`openai-lru-cache-staged`) |
+| Google code comprehension | **Shipped** (6 variants) |
+| Time-based KV · retry/DLQ · etc. | **Shipped** (run #1) |
 
 ---
 
@@ -152,5 +106,5 @@ When you get updated Claude/ChatGPT prep docs or candidate reports:
 
 | Date | Change |
 |------|--------|
-| 2026-06 | Initial backlog from prep-doc synthesis; 6/39 shipped; authoring run sequenced Anthropic → OpenAI → Google → DeepMind → Meta |
-| 2026-06 | Local authoring run complete: 39/39 dedicated seeds (12 staged + 27 classic) |
+| 2026-06 | Run #1: 39/39 minimum viable seeds |
+| 2026-06 | Run #2: comprehension format + 6 canonical staged + 6 comprehension → 51 total |

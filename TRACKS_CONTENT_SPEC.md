@@ -145,8 +145,8 @@ Anthropic 6 staged · OpenAI 6 staged · Google 9 classic (3/level) ·
 Meta 9 classic (3/E-level) · DeepMind 9 (6 classic + 3 ML-primitive).
 General Fluency track: untouched.
 
-**Current inventory:** see [`PREP_BACKLOG.md`](./PREP_BACKLOG.md) (**39/39**
-dedicated seeds shipped — June 2026 local authoring run).
+**Current inventory:** see [`PREP_BACKLOG.md`](./PREP_BACKLOG.md) (**51** dedicated
+seeds — run #2 adds comprehension format + canonical builds).
 
 ## Quality gate (apply to every authored snippet before commit)
 
