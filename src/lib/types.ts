@@ -137,7 +137,7 @@ export interface Snippet {
   leetcodeId?: number;
   /** Original inspiration — never copied verbatim from external catalogs. */
   provenance?: ContentProvenance;
-  /** Parent snippet when this is an optimization or alternative implementation. */
+  /** Parent snippet when this is an optimization, alternative implementation, or language mirror. */
   variantOf?: string;
   /** Content packs this snippet belongs to (e.g. blind-75-track). */
   packIds?: string[];

@@ -250,6 +250,20 @@ Schema fields `levelRange`, `format`, `sourceStyle`, `buggyCode`, `plantedBugKin
 
 ## CHANGES
 
+### Run #3 — Google multi-language mirrors (Phase 0 report)
+
+**Verdict: contained extension — proceeding without engine changes.**
+
+Each language is a separate `Snippet` row with `language` set to `java` | `cpp`.
+Mirrors link to the Python canonical id via `variantOf`. The existing language
+selector in `filterSnippets` / `pickSnippet` already routes by `language`; no
+multi-code payload on one snippet, no typing-engine fork.
+
+Convention: mirror ids use suffix `-java` / `-cpp` via `languageMirrorId()` in
+`src/data/curriculum/builder.ts`.
+
+---
+
 ### Run #2 — Comprehension format + canonical builds (June 2026, local)
 
 **Phase 0 — Comprehension format (contained; no typing-engine fork):**

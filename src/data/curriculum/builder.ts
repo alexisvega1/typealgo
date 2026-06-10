@@ -1,9 +1,14 @@
-import type { Snippet, SnippetStage } from "@/lib/types";
+import type { Snippet, SnippetStage, Language } from "@/lib/types";
 
 type SnippetInput = Omit<Snippet, "fluencyLevel"> & {
   fluencyLevel?: Snippet["fluencyLevel"];
   code?: string;
 };
+
+/** Snippet id for a language mirror of a Python-canonical seed (e.g. foo → foo-java). */
+export function languageMirrorId(baseId: string, language: Exclude<Language, "python" | "javascript">): string {
+  return `${baseId}-${language}`;
+}
 
 /** Define a curriculum snippet with defaults. */
 export function snippet(s: SnippetInput): Snippet {
