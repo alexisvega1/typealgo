@@ -244,7 +244,7 @@ Schema fields `levelRange`, `format`, `sourceStyle`, `buggyCode`, `plantedBugKin
 
 **Combined inventory:** 18 staged · 27 classic · 6 comprehension · **51 dedicated seeds**
 
-**Review notes:** Stage headers may be tightened to spec voice in a follow-up polish pass. Google multi-language mirrors remain deferred. `openai-lru-cache-staged` and `google-lru-cache` are intentional pairs (staged build vs classic one-shot).
+**Review notes:** Stage headers may be tightened to spec voice in a follow-up polish pass. `openai-lru-cache-staged` and `google-lru-cache` are intentional pairs (staged build vs classic one-shot).
 
 ---
 
@@ -262,6 +262,12 @@ multi-code payload on one snippet, no typing-engine fork.
 Convention: mirror ids use suffix `-java` / `-cpp` via `languageMirrorId()` in
 `src/data/curriculum/builder.ts`.
 
+**Phases 1–3 shipped (local, not pushed):**
+- +9 Java classic + 6 Java comprehension (`company-google-java.ts`, `company-google-comprehension-java.ts`)
+- +9 C++ classic + 6 C++ comprehension (`company-google-cpp.ts`, `company-google-comprehension-cpp.ts`)
+- Comprehension mirrors link to Python comprehension ids; classic mirrors link to Python classic ids
+- **Inventory:** 51 logical seeds → **87** snippet rows (+36 mirrors; JS intentionally skipped)
+
 ---
 
 ### Run #2 — Comprehension format + canonical builds (June 2026, local)
@@ -276,7 +282,7 @@ Convention: mirror ids use suffix `-java` / `-cpp` via `languageMirrorId()` in
 - +3 OpenAI staged (webhook queue, stream dedup, staged LRU).
 - +6 Google comprehension variants in `company-google-comprehension.ts`.
 
-**Deferred:** Google multi-language mirrors (Java/C++/JS).
+**Deferred:** ~~Google multi-language mirrors (Java/C++/JS).~~ **Shipped run #3** (Java + C++ only).
 
 ---
 

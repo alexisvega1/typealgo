@@ -11,8 +11,8 @@ Living document for **what TypeAlgo still needs** vs what is shipped, ordered by
 **Ready-to-run authoring prompt:** [`docs/prep/AUTHORING_RUN.md`](./docs/prep/AUTHORING_RUN.md)  
 **Engine audit:** [`SEMANTIC_AUDIT.md`](./SEMANTIC_AUDIT.md)
 
-Last updated: June 2026 (run #2 complete — **51** dedicated seeds).  
-**Queued runs:** [`docs/prep/AUTHORING_RUN_2.md`](./docs/prep/AUTHORING_RUN_2.md) (Google mirrors) · [`AUTHORING_RUN_3.md`](./docs/prep/AUTHORING_RUN_3.md) (L3 depth) · [`AUTHORING_RUN_4_LANDING.md`](./docs/prep/AUTHORING_RUN_4_LANDING.md) (hero — blocked)
+Last updated: June 2026 (run #3 complete — **87** dedicated seed rows; 51 logical + 36 language mirrors).  
+**Queued runs:** [`docs/prep/AUTHORING_RUN_3.md`](./docs/prep/AUTHORING_RUN_3.md) (L3 depth) · [`AUTHORING_RUN_4_LANDING.md`](./docs/prep/AUTHORING_RUN_4_LANDING.md) (hero — blocked)
 
 ---
 
@@ -22,13 +22,13 @@ Last updated: June 2026 (run #2 complete — **51** dedicated seeds).
 |------|------------|---------|-------|
 | Anthropic staged | 6 | **9** | +3 canonical (crawler, producer-consumer, DAG) |
 | OpenAI staged | 6 | **9** | +3 canonical (webhook, dedup, staged LRU) |
-| Google classic | 9 | **9** | unchanged |
-| Google comprehension | — | **6** | new format (run #2) |
+| Google classic | 9 | **27** | 9 Python + 9 Java + 9 C++ mirrors |
+| Google comprehension | — | **18** | 6 × 3 langs (run #2 + #3 mirrors) |
 | DeepMind | 9 | **9** | unchanged |
 | Meta classic | 9 | **9** | unchanged |
-| **Total dedicated seeds** | **39** | **51** | |
+| **Total dedicated seeds** | **39** | **87** | 51 logical + 36 mirror rows |
 
-**Staged pool:** 18/18 · **Classic dedicated:** 27/27 · **Comprehension:** 6/6
+**Staged pool:** 18/18 · **Classic dedicated:** 27/27 · **Comprehension:** 18/18 (6 logical × 3 langs)
 
 ---
 
@@ -58,7 +58,12 @@ L3: fix merge sorted · fix grid BFS
 L4: fix topo sort · fix merge intervals  
 L5: fix edit distance · fix LRU eviction
 
-Each links to a classic via `variantOf`.
+Each links to a classic via `variantOf`. Java/C++ mirrors in `company-google-comprehension-{java,cpp}.ts` link to Python comprehension ids.
+
+### Google language mirrors (36) — run #3
+
+Classic: `company-google-{java,cpp}.ts` (9 each) · Comprehension: `company-google-comprehension-{java,cpp}.ts` (6 each).  
+Python remains canonical; mirrors use `variantOf` + `languageMirrorId()` suffix `-java` / `-cpp`.
 
 ### DeepMind (9) · Meta classic (9)
 
@@ -70,7 +75,6 @@ Unchanged from run #1 — see [`TRACKS_AUDIT.md`](./TRACKS_AUDIT.md).
 
 | Item | Status |
 |------|--------|
-| Google multi-language mirrors (Java/C++/JS) | **Deferred** |
 | Double-each-track quality expansion | Optional after human review |
 | Stage header voice polish | Optional |
 
@@ -84,7 +88,7 @@ Unchanged from run #1 — see [`TRACKS_AUDIT.md`](./TRACKS_AUDIT.md).
 |---------|--------|-------|
 | Comprehension format engine path | **Shipped** | Run #2 Phase 0 — display panel only |
 | Schema: `buggyCode`, `plantedBugKind` | **Shipped** | On `Snippet` |
-| Google multi-language seeds | Deferred | Python pool + comprehension shipped |
+| Google multi-language seeds | **Shipped** | Run #3 — Java + C++ mirrors (JS skipped) |
 
 ---
 
