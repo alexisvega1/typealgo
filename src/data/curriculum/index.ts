@@ -6,8 +6,10 @@ import { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
 import { STAGED_SNIPPETS } from "./staged-problems";
 import { GOOGLE_SNIPPETS } from "./company-google";
 import { GOOGLE_JAVA_SNIPPETS } from "./company-google-java";
+import { GOOGLE_CPP_SNIPPETS } from "./company-google-cpp";
 import { GOOGLE_COMPREHENSION_SNIPPETS } from "./company-google-comprehension";
 import { GOOGLE_COMPREHENSION_JAVA_SNIPPETS } from "./company-google-comprehension-java";
+import { GOOGLE_COMPREHENSION_CPP_SNIPPETS } from "./company-google-comprehension-cpp";
 import { DEEPMIND_SNIPPETS } from "./company-deepmind";
 import { META_SNIPPETS } from "./company-meta";
 import { CURRICULUM_TIERS } from "./tiers";
@@ -23,8 +25,10 @@ export { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
 export { STAGED_SNIPPETS } from "./staged-problems";
 export { GOOGLE_SNIPPETS } from "./company-google";
 export { GOOGLE_JAVA_SNIPPETS } from "./company-google-java";
+export { GOOGLE_CPP_SNIPPETS } from "./company-google-cpp";
 export { GOOGLE_COMPREHENSION_SNIPPETS } from "./company-google-comprehension";
 export { GOOGLE_COMPREHENSION_JAVA_SNIPPETS } from "./company-google-comprehension-java";
+export { GOOGLE_COMPREHENSION_CPP_SNIPPETS } from "./company-google-comprehension-cpp";
 export { DEEPMIND_SNIPPETS } from "./company-deepmind";
 export { META_SNIPPETS } from "./company-meta";
 
@@ -35,8 +39,10 @@ export const SNIPPETS: Snippet[] = [
   ...STAGED_SNIPPETS,
   ...GOOGLE_SNIPPETS,
   ...GOOGLE_JAVA_SNIPPETS,
+  ...GOOGLE_CPP_SNIPPETS,
   ...GOOGLE_COMPREHENSION_SNIPPETS,
   ...GOOGLE_COMPREHENSION_JAVA_SNIPPETS,
+  ...GOOGLE_COMPREHENSION_CPP_SNIPPETS,
   ...DEEPMIND_SNIPPETS,
   ...META_SNIPPETS,
 ];
