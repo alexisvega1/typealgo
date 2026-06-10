@@ -157,19 +157,25 @@ Track `tagline` / `cognitiveProfile` shown on curriculum page; **not** shown in 
 
 **WHAT to author:** [`TRACKS_CONTENT_SPEC.md`](./TRACKS_CONTENT_SPEC.md) — company track × level archetypes, seed quantities, quality gate. When the build phases and this spec conflict, **this spec wins on content decisions**.
 
+**Backlog queue (shipped vs absent, priority order):** [`PREP_BACKLOG.md`](./PREP_BACKLOG.md)  
+**Authoring run prompt:** [`docs/prep/AUTHORING_RUN.md`](./docs/prep/AUTHORING_RUN.md)  
+**Prep source docs:** [`docs/prep/`](./docs/prep/)
+
 ---
 
 ## Seed inventory (vs minimum viable)
 
+> **Scannable absent list + prep-doc crosswalk:** [`PREP_BACKLOG.md`](./PREP_BACKLOG.md)
+
 | Track | Spec minimum | Shipped | Gap |
 |-------|-------------|---------|-----|
-| Anthropic | 6 staged | 3 staged | 3 (L3 LRU/counter; L4 event log; L5 concurrency) |
-| OpenAI | 6 staged | 3 staged | 3 (L3 iterator; L4 IP iterator; L5 versioned KV / webhook) |
-| Google | 9 classic | 0 dedicated | 9 (evidence-weighted classic pool only today) |
-| Meta | 9 classic | 0 dedicated | 9 (evidence-weighted classic pool only today) |
-| DeepMind | 9 (6+3 ML) | 0 dedicated | 9 (evidence-weighted classic pool only today) |
+| Anthropic | 6 staged | 3 staged | 3 — event log, counter, thread-safe queue |
+| OpenAI | 6 staged | 3 staged | 3 — retry/DLQ, IP iterator, versioned KV |
+| Google | 9 classic | 0 dedicated | 9 |
+| DeepMind | 9 (6+3 ML) | 0 dedicated | 9 |
+| Meta | 9 classic | 0 dedicated | 9 (product completeness; lowest priority) |
 
-Schema fields `level_range`, `format`, `source_style` from the content spec are **not yet on `Snippet`** — staged problems use `packIds` + implicit L4 band. Follow-up: extend metadata per spec before the “double each track” pass.
+Schema fields `level_range`, `format`, `source_style` from the content spec are **not yet on `Snippet`** — Phase 0 of authoring run. Staged problems use `packIds` + implicit L4 band today.
 
 ### Shipped seed log (Phase 5 — pre-spec review)
 

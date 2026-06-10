@@ -119,11 +119,34 @@ typing fluency is directly what they filter for.
   (loops, no libraries), gradient descent step for linear
   regression, top-k sampling.
 
+## Why these archetypes
+
+Archetypes mirror **source-weighted 2026 prep research**, not generic
+LeetCode coverage. Authoritative prep inputs live in
+[`docs/prep/`](./docs/prep/) (revised Claude exports). The living
+**shipped vs absent** queue is [`PREP_BACKLOG.md`](./PREP_BACKLOG.md);
+execute new seeds via [`docs/prep/AUTHORING_RUN.md`](./docs/prep/AUTHORING_RUN.md).
+
+| Track | Real interview shape (prep docs) | TypeAlgo format |
+|-------|----------------------------------|-----------------|
+| Anthropic | Multi-tier production builds; concurrency at senior band | staged, 2–4 stages |
+| OpenAI | Gate-by-gate component rebuilds; test-driven | staged, gate headers |
+| Google | Classic DSA under time pressure | classic single-stage |
+| Meta | Tagged-list speed (classic round) | classic; E-level labels |
+| DeepMind | Medium + hard pair; unaided; ML primitives at L5 | classic + stdlib ML |
+
+**Candidate priority (authoring order):** Anthropic → OpenAI → Google →
+DeepMind → Meta. System design, values, and deep-dive prep stay in the
+prompt library — not typing snippets.
+
 ## Seed quantities (minimum viable per track)
 
 Anthropic 6 staged · OpenAI 6 staged · Google 9 classic (3/level) ·
 Meta 9 classic (3/E-level) · DeepMind 9 (6 classic + 3 ML-primitive).
 General Fluency track: untouched.
+
+**Current inventory:** see [`PREP_BACKLOG.md`](./PREP_BACKLOG.md) (6/39
+shipped as of June 2026).
 
 ## Quality gate (apply to every authored snippet before commit)
 
