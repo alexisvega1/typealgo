@@ -443,4 +443,228 @@ class SlidingRateLimiter:
       },
     ],
   }),
+
+  stagedSnippet({
+    id: "anthropic-event-log",
+    title: "Append-Only Event Log",
+    pattern: "hash-map",
+    difficulty: "medium",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 3,
+    motifs: ["enumerate-index", "counter-defaultdict"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["mid"],
+    sourceStyle: "Anthropic L4 event log — append, replay, compact.",
+    description: "Production event log with offset replay and compaction.",
+    stages: [
+      {
+        id: "append",
+        requirement: "Stage 1: append(event) assigns monotonic offsets starting at 0.",
+        code: `class EventLog:
+    def __init__(self) -> None:
+        self._events: list[str] = []
+
+    def append(self, event: str) -> int:
+        offset = len(self._events)
+        self._events.append(event)
+        return offset
+`,
+      },
+      {
+        id: "replay",
+        requirement: "Stage 2: replay(from_offset) yields events from that offset onward.",
+        code: `class EventLog:
+    def __init__(self) -> None:
+        self._events: list[str] = []
+
+    def append(self, event: str) -> int:
+        offset = len(self._events)
+        self._events.append(event)
+        return offset
+
+    def replay(self, from_offset: int) -> list[str]:
+        if from_offset < 0 or from_offset > len(self._events):
+            raise ValueError("invalid offset")
+        return self._events[from_offset:]
+`,
+      },
+      {
+        id: "compact",
+        requirement: "Stage 3: compact(before_offset) drops events before the cutoff.",
+        code: `class EventLog:
+    def __init__(self) -> None:
+        self._events: list[str] = []
+
+    def append(self, event: str) -> int:
+        offset = len(self._events)
+        self._events.append(event)
+        return offset
+
+    def replay(self, from_offset: int) -> list[str]:
+        if from_offset < 0 or from_offset > len(self._events):
+            raise ValueError("invalid offset")
+        return self._events[from_offset:]
+
+    def compact(self, before_offset: int) -> None:
+        if before_offset < 0:
+            raise ValueError("invalid offset")
+        self._events = self._events[before_offset:]
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "anthropic-counter-service",
+    title: "Windowed Counter Service",
+    pattern: "hash-map",
+    difficulty: "easy",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 2,
+    motifs: ["counter-defaultdict", "hash-lookup"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["junior"],
+    sourceStyle: "Anthropic L3 counter with keyed increments.",
+    description: "Simple counter service escalating to windowed reset.",
+    stages: [
+      {
+        id: "basic",
+        requirement: "Stage 1: increment(key) and get(key) with default 0.",
+        code: `class CounterService:
+    def __init__(self) -> None:
+        self._counts: dict[str, int] = {}
+
+    def increment(self, key: str, delta: int = 1) -> int:
+        self._counts[key] = self._counts.get(key, 0) + delta
+        return self._counts[key]
+
+    def get(self, key: str) -> int:
+        return self._counts.get(key, 0)
+`,
+      },
+      {
+        id: "reset-window",
+        requirement: "Stage 2: reset_all() clears every counter for a new window.",
+        code: `class CounterService:
+    def __init__(self) -> None:
+        self._counts: dict[str, int] = {}
+
+    def increment(self, key: str, delta: int = 1) -> int:
+        self._counts[key] = self._counts.get(key, 0) + delta
+        return self._counts[key]
+
+    def get(self, key: str) -> int:
+        return self._counts.get(key, 0)
+
+    def reset_all(self) -> None:
+        self._counts.clear()
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "anthropic-bounded-queue",
+    title: "Thread-Safe Bounded Queue",
+    pattern: "stack",
+    difficulty: "hard",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 4,
+    motifs: ["deque-window"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["senior"],
+    sourceStyle: "Anthropic L5 concurrency — lock, condition, backpressure.",
+    description: "Bounded queue escalating to thread-safe put/get with timeout.",
+    stages: [
+      {
+        id: "single-thread",
+        requirement: "Stage 1: put(item) blocks when full; get() blocks when empty.",
+        code: `from collections import deque
+
+class BoundedQueue:
+    def __init__(self, capacity: int) -> None:
+        if capacity < 1:
+            raise ValueError("capacity must be positive")
+        self._capacity = capacity
+        self._items: deque[str] = deque()
+
+    def put(self, item: str) -> None:
+        while len(self._items) >= self._capacity:
+            pass
+        self._items.append(item)
+
+    def get(self) -> str:
+        while not self._items:
+            pass
+        return self._items.popleft()
+`,
+      },
+      {
+        id: "locked",
+        requirement: "Stage 2: Protect put/get with threading.Lock.",
+        code: `from collections import deque
+import threading
+
+class BoundedQueue:
+    def __init__(self, capacity: int) -> None:
+        if capacity < 1:
+            raise ValueError("capacity must be positive")
+        self._capacity = capacity
+        self._items: deque[str] = deque()
+        self._lock = threading.Lock()
+
+    def put(self, item: str) -> None:
+        with self._lock:
+            while len(self._items) >= self._capacity:
+                pass
+            self._items.append(item)
+
+    def get(self) -> str:
+        with self._lock:
+            while not self._items:
+                pass
+            return self._items.popleft()
+`,
+      },
+      {
+        id: "condition",
+        requirement: "Stage 3: Use Condition for backpressure; get(timeout) returns None on timeout.",
+        code: `from collections import deque
+import threading
+
+class BoundedQueue:
+    def __init__(self, capacity: int) -> None:
+        if capacity < 1:
+            raise ValueError("capacity must be positive")
+        self._capacity = capacity
+        self._items: deque[str] = deque()
+        self._cond = threading.Condition()
+
+    def put(self, item: str) -> None:
+        with self._cond:
+            while len(self._items) >= self._capacity:
+                self._cond.wait()
+            self._items.append(item)
+            self._cond.notify()
+
+    def get(self, timeout: float | None = None) -> str | None:
+        with self._cond:
+            if not self._items:
+                if not self._cond.wait(timeout):
+                    return None
+            if not self._items:
+                return None
+            value = self._items.popleft()
+            self._cond.notify()
+            return value
+`,
+      },
+    ],
+  }),
 ];
