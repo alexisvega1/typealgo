@@ -10,9 +10,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useClientMounted } from "@/lib/use-client-mounted";
 import { useStatsStore } from "@/stores/stats-store";
 
 export function WpmChart() {
+  const mounted = useClientMounted();
   const results = useStatsStore((s) => s.results);
 
   const data = useMemo(() => {
@@ -37,8 +39,8 @@ export function WpmChart() {
           <div className="flex h-full items-center justify-center text-sm text-muted">
             Complete a session to see your trend
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
+        ) : mounted ? (
+          <ResponsiveContainer width="100%" height="100%" minWidth={260} minHeight={140}>
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="wpmGrad" x1="0" y1="0" x2="0" y2="1">
@@ -78,7 +80,7 @@ export function WpmChart() {
               />
             </AreaChart>
           </ResponsiveContainer>
-        )}
+        ) : null}
       </div>
     </section>
   );

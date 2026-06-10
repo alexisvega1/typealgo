@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:smoke": "node scripts/smoke-test.mjs",
     "audit:auth": "node scripts/audit-auth.mjs"
   },
   "dependencies": {
