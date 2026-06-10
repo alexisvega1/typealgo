@@ -11,7 +11,8 @@ Living document for **what TypeAlgo still needs** vs what is shipped, ordered by
 **Ready-to-run authoring prompt:** [`docs/prep/AUTHORING_RUN.md`](./docs/prep/AUTHORING_RUN.md)  
 **Engine audit:** [`SEMANTIC_AUDIT.md`](./SEMANTIC_AUDIT.md)
 
-Last updated: June 2026 (run #2 complete — **51** dedicated seeds).
+Last updated: June 2026 (run #2 complete — **51** dedicated seeds).  
+**Queued runs:** [`docs/prep/AUTHORING_RUN_2.md`](./docs/prep/AUTHORING_RUN_2.md) (Google mirrors) · [`AUTHORING_RUN_3.md`](./docs/prep/AUTHORING_RUN_3.md) (L3 depth) · [`AUTHORING_RUN_4_LANDING.md`](./docs/prep/AUTHORING_RUN_4_LANDING.md) (hero — blocked)
 
 ---
 
