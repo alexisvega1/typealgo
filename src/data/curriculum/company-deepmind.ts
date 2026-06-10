@@ -205,11 +205,13 @@ class StreamAnomaly:
     format: "classic",
     sourceStyle: "DeepMind L5 stdlib softmax with max subtraction.",
     description: "Return probabilities that sum to 1; stable for large logits.",
-    code: `def stable_softmax(logits: list[float]) -> list[float]:
+    code: `import math
+
+def stable_softmax(logits: list[float]) -> list[float]:
     if not logits:
         return []
     m = max(logits)
-    exps = [pow(2.718281828, x - m) for x in logits]
+    exps = [math.exp(x - m) for x in logits]
     total = sum(exps)
     if total == 0:
         return [1.0 / len(logits)] * len(logits)
@@ -260,7 +262,7 @@ class StreamAnomaly:
     levelRange: ["senior"],
     format: "classic",
     sourceStyle: "DeepMind L5 attention logits with plain loops.",
-    description: "Compute query-key dot products scaled by sqrt(d_k).",
+    description: "Return pre-softmax scaled query-key dot products (Q·K / √d_k).",
     code: `def attention_scores(query: list[float], keys: list[list[float]]) -> list[float]:
     if not keys:
         return []
