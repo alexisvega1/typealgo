@@ -899,4 +899,318 @@ class IpIterator:
       },
     ],
   }),
+
+  stagedSnippet({
+    id: "anthropic-concurrent-crawler",
+    title: "Concurrent Web Crawler",
+    pattern: "graphs",
+    difficulty: "hard",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 4,
+    motifs: ["graph-adjacency", "bfs-queue"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["senior"],
+    sourceStyle: "Anthropic L5 threaded crawler — fetch, politeness, dedup.",
+    description: "Multi-threaded crawler with rate limiting and visited-set deduplication.",
+    stages: [
+      {
+        id: "fetch-parse",
+        requirement: "Stage 1: fetch(url) returns HTML; parse_links extracts absolute hrefs.",
+        code: `import re
+from urllib.parse import urljoin
+
+class Crawler:
+    _HREF = re.compile(r'href=["\\']([^"\\']+)["\\']')
+
+    def fetch(self, url: str) -> str:
+        raise NotImplementedError("network stub")
+
+    def parse_links(self, html: str, base: str) -> list[str]:
+        links: list[str] = []
+        for match in self._HREF.finditer(html):
+            href = match.group(1).split("#", 1)[0]
+            if href and not href.startswith(("mailto:", "javascript:")):
+                links.append(urljoin(base, href))
+        return links
+`,
+      },
+      {
+        id: "politeness",
+        requirement: "Stage 2: wait_turn() enforces min delay between fetches with a Lock.",
+        code: `import re
+import threading
+import time
+from urllib.parse import urljoin
+
+class Crawler:
+    _HREF = re.compile(r'href=["\\']([^"\\']+)["\\']')
+
+    def __init__(self, min_delay_sec: float = 0.5) -> None:
+        self._min_delay = min_delay_sec
+        self._lock = threading.Lock()
+        self._last_fetch = 0.0
+
+    def fetch(self, url: str) -> str:
+        raise NotImplementedError("network stub")
+
+    def parse_links(self, html: str, base: str) -> list[str]:
+        links: list[str] = []
+        for match in self._HREF.finditer(html):
+            href = match.group(1).split("#", 1)[0]
+            if href and not href.startswith(("mailto:", "javascript:")):
+                links.append(urljoin(base, href))
+        return links
+
+    def wait_turn(self) -> None:
+        with self._lock:
+            now = time.monotonic()
+            wait = self._min_delay - (now - self._last_fetch)
+            if wait > 0:
+                time.sleep(wait)
+            self._last_fetch = time.monotonic()
+`,
+      },
+      {
+        id: "visited-dedup",
+        requirement: "Stage 3: crawl(seed) returns pages fetched once using a thread-safe visited set.",
+        code: `import re
+import threading
+import time
+from collections import deque
+from urllib.parse import urljoin
+
+class Crawler:
+    _HREF = re.compile(r'href=["\\']([^"\\']+)["\\']')
+
+    def __init__(self, min_delay_sec: float = 0.5) -> None:
+        self._min_delay = min_delay_sec
+        self._lock = threading.Lock()
+        self._last_fetch = 0.0
+        self._visited: set[str] = set()
+        self._visited_lock = threading.Lock()
+
+    def fetch(self, url: str) -> str:
+        raise NotImplementedError("network stub")
+
+    def parse_links(self, html: str, base: str) -> list[str]:
+        links: list[str] = []
+        for match in self._HREF.finditer(html):
+            href = match.group(1).split("#", 1)[0]
+            if href and not href.startswith(("mailto:", "javascript:")):
+                links.append(urljoin(base, href))
+        return links
+
+    def wait_turn(self) -> None:
+        with self._lock:
+            now = time.monotonic()
+            wait = self._min_delay - (now - self._last_fetch)
+            if wait > 0:
+                time.sleep(wait)
+            self._last_fetch = time.monotonic()
+
+    def _mark_visited(self, url: str) -> bool:
+        with self._visited_lock:
+            if url in self._visited:
+                return False
+            self._visited.add(url)
+            return True
+
+    def crawl(self, seed: str, max_pages: int = 50) -> list[str]:
+        queue: deque[str] = deque([seed])
+        fetched: list[str] = []
+        while queue and len(fetched) < max_pages:
+            url = queue.popleft()
+            if not self._mark_visited(url):
+                continue
+            self.wait_turn()
+            html = self.fetch(url)
+            fetched.append(url)
+            for link in self.parse_links(html, url):
+                queue.append(link)
+        return fetched
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "anthropic-producer-consumer",
+    title: "Producer-Consumer Buffer",
+    pattern: "stack",
+    difficulty: "hard",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 4,
+    motifs: ["deque-window"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["senior"],
+    sourceStyle: "Anthropic L5 sync buffer then asyncio.Queue.",
+    description: "Bounded buffer with threading, then async queue variant.",
+    stages: [
+      {
+        id: "sync",
+        requirement: "Stage 1: BoundedBuffer uses Lock/Condition for blocking put and get.",
+        code: `from collections import deque
+import threading
+
+class BoundedBuffer:
+    def __init__(self, capacity: int) -> None:
+        self._cap = capacity
+        self._items: deque[str] = deque()
+        self._cond = threading.Condition()
+
+    def put(self, item: str) -> None:
+        with self._cond:
+            while len(self._items) >= self._cap:
+                self._cond.wait()
+            self._items.append(item)
+            self._cond.notify()
+
+    def get(self) -> str:
+        with self._cond:
+            while not self._items:
+                self._cond.wait()
+            item = self._items.popleft()
+            self._cond.notify()
+            return item
+`,
+      },
+      {
+        id: "async",
+        requirement: "Stage 2: AsyncBoundedBuffer wraps asyncio.Queue with the same put/get API.",
+        code: `import asyncio
+
+class AsyncBoundedBuffer:
+    def __init__(self, capacity: int) -> None:
+        self._queue: asyncio.Queue[str] = asyncio.Queue(maxsize=capacity)
+
+    async def put(self, item: str) -> None:
+        await self._queue.put(item)
+
+    async def get(self) -> str:
+        return await self._queue.get()
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "anthropic-dag-scheduler",
+    title: "Job DAG Scheduler",
+    pattern: "graphs",
+    difficulty: "medium",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 3,
+    motifs: ["graph-adjacency"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["mid"],
+    sourceStyle: "Anthropic L4 DAG run → topo order → cycle detect.",
+    description: "Schedule jobs with dependencies; detect cycles before execution.",
+    stages: [
+      {
+        id: "run-single",
+        requirement: "Stage 1: run(job_id) records completion in finished set.",
+        code: `class JobScheduler:
+    def __init__(self) -> None:
+        self._finished: set[str] = set()
+
+    def run(self, job_id: str) -> None:
+        self._finished.add(job_id)
+
+    def is_done(self, job_id: str) -> bool:
+        return job_id in self._finished
+`,
+      },
+      {
+        id: "topo-run",
+        requirement: "Stage 2: run_all(deps) executes jobs respecting dependency edges.",
+        code: `from collections import deque
+
+class JobScheduler:
+    def __init__(self) -> None:
+        self._finished: set[str] = set()
+
+    def run(self, job_id: str) -> None:
+        self._finished.add(job_id)
+
+    def is_done(self, job_id: str) -> bool:
+        return job_id in self._finished
+
+    def run_all(self, jobs: list[str], deps: list[tuple[str, str]]) -> list[str]:
+        indeg: dict[str, int] = {j: 0 for j in jobs}
+        adj: dict[str, list[str]] = {j: [] for j in jobs}
+        for before, after in deps:
+            adj[before].append(after)
+            indeg[after] += 1
+        q = deque(j for j in jobs if indeg[j] == 0)
+        order: list[str] = []
+        while q:
+            job = q.popleft()
+            self.run(job)
+            order.append(job)
+            for nxt in adj[job]:
+                indeg[nxt] -= 1
+                if indeg[nxt] == 0:
+                    q.append(nxt)
+        return order
+`,
+      },
+      {
+        id: "cycle-detect",
+        requirement: "Stage 3: has_cycle(deps) returns True when dependencies form a loop.",
+        code: `from collections import deque
+
+class JobScheduler:
+    def __init__(self) -> None:
+        self._finished: set[str] = set()
+
+    def run(self, job_id: str) -> None:
+        self._finished.add(job_id)
+
+    def is_done(self, job_id: str) -> bool:
+        return job_id in self._finished
+
+    def run_all(self, jobs: list[str], deps: list[tuple[str, str]]) -> list[str]:
+        indeg: dict[str, int] = {j: 0 for j in jobs}
+        adj: dict[str, list[str]] = {j: [] for j in jobs}
+        for before, after in deps:
+            adj[before].append(after)
+            indeg[after] += 1
+        q = deque(j for j in jobs if indeg[j] == 0)
+        order: list[str] = []
+        while q:
+            job = q.popleft()
+            self.run(job)
+            order.append(job)
+            for nxt in adj[job]:
+                indeg[nxt] -= 1
+                if indeg[nxt] == 0:
+                    q.append(nxt)
+        return order
+
+    def has_cycle(self, jobs: list[str], deps: list[tuple[str, str]]) -> bool:
+        indeg: dict[str, int] = {j: 0 for j in jobs}
+        adj: dict[str, list[str]] = {j: [] for j in jobs}
+        for before, after in deps:
+            adj[before].append(after)
+            indeg[after] += 1
+        q = deque(j for j in jobs if indeg[j] == 0)
+        seen = 0
+        while q:
+            job = q.popleft()
+            seen += 1
+            for nxt in adj[job]:
+                indeg[nxt] -= 1
+                if indeg[nxt] == 0:
+                    q.append(nxt)
+        return seen != len(jobs)
+`,
+      },
+    ],
+  }),
 ];
