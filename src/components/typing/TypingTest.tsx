@@ -49,6 +49,7 @@ import { useSettingsStore } from "@/stores/settings-store";
 import { useStatsStore } from "@/stores/stats-store";
 import type { CharToken, KeystrokeEvent, Snippet, TypingResult } from "@/lib/types";
 import { ProblemHeader } from "./ProblemHeader";
+import { ComprehensionBugContext } from "./ComprehensionBugContext";
 import { LiveStats } from "./LiveStats";
 import { MobileActionBar } from "./MobileActionBar";
 import { RecallConfidence } from "./RecallConfidence";
@@ -1162,6 +1163,7 @@ export function TypingTest() {
           visible={(isRecallActive || isSprintMode) && started && sprintPhase === "active"}
           showRevealHint={showRevealHint && !isSprintMode}
         />
+        <ComprehensionBugContext snippet={snippet} />
         <div
           ref={viewportRef}
           className={clsx("code-viewport mt-6", !isReviewMode && "code-viewport-typing")}

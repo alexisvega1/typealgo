@@ -104,6 +104,15 @@ export type FluencyLevel = 1 | 2 | 3 | 4 | 5;
 /** How this snippet is presented in the typing engine. */
 export type SnippetFormat = "classic" | "staged" | "comprehension";
 
+/** Planted-bug taxonomy for comprehension-format problems. */
+export type PlantedBugKind =
+  | "off-by-one"
+  | "wrong-comparison"
+  | "missing-visited"
+  | "mutation-during-iteration"
+  | "wrong-base-case"
+  | "inverted-condition";
+
 /** One escalating gate in a multi-stage interview-style problem. */
 export interface SnippetStage {
   id: string;
@@ -142,6 +151,10 @@ export interface Snippet {
   sourceStyle?: string;
   /** Ordered stages for progressive system-building problems; `code` mirrors stage 1. */
   stages?: SnippetStage[];
+  /** Buggy code shown as read-only context; typing target is `code` (comprehension format). */
+  buggyCode?: string;
+  /** Planted-bug category for comprehension problems. */
+  plantedBugKind?: PlantedBugKind;
   /** Evidence-weighted associations — computed or curated override. */
   evidence?: SnippetEvidenceProfile;
 }

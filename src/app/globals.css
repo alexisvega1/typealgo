@@ -770,6 +770,40 @@ body {
   font-size: 0.6875rem;
 }
 
+.comprehension-bug-context {
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--red) 35%, var(--border));
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--red) 6%, var(--background));
+  overflow: hidden;
+}
+
+.comprehension-bug-context-label {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--red);
+  border-bottom: 1px solid color-mix(in srgb, var(--red) 20%, var(--border));
+}
+
+.comprehension-bug-context-code {
+  margin: 0;
+  padding: 0.75rem;
+  max-height: 12rem;
+  overflow: auto;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--muted);
+  white-space: pre;
+}
+
+.comprehension-bug-line {
+  display: block;
+}
+
 .settings-field {
   display: flex;
   align-items: center;
