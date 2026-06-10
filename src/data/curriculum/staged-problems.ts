@@ -1213,4 +1213,239 @@ class JobScheduler:
       },
     ],
   }),
+
+  stagedSnippet({
+    id: "openai-webhook-delivery",
+    title: "Webhook Delivery Queue",
+    pattern: "stack",
+    difficulty: "hard",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 4,
+    motifs: ["deque-window"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["senior"],
+    sourceStyle: "OpenAI L5 webhook queue — schedule, backoff, idempotency.",
+    description: "Deliver webhooks with retry backoff and idempotency keys.",
+    stages: [
+      {
+        id: "schedule",
+        requirement: "Gate 1: schedule(event_id, url) enqueues pending deliveries.",
+        code: `from collections import deque
+from dataclasses import dataclass
+
+@dataclass
+class Delivery:
+    event_id: str
+    url: str
+
+class WebhookQueue:
+    def __init__(self) -> None:
+        self._pending: deque[Delivery] = deque()
+
+    def schedule(self, event_id: str, url: str) -> None:
+        self._pending.append(Delivery(event_id, url))
+
+    def next_pending(self) -> Delivery | None:
+        return self._pending.popleft() if self._pending else None
+`,
+      },
+      {
+        id: "backoff",
+        requirement: "Gate 2: record_failure(id) requeues with exponential backoff delay.",
+        code: `from collections import deque
+from dataclasses import dataclass
+
+@dataclass
+class Delivery:
+    event_id: str
+    url: str
+    attempts: int = 0
+
+class WebhookQueue:
+    def __init__(self, max_attempts: int = 5) -> None:
+        self._pending: deque[Delivery] = deque()
+        self._max_attempts = max_attempts
+
+    def schedule(self, event_id: str, url: str) -> None:
+        self._pending.append(Delivery(event_id, url))
+
+    def next_pending(self) -> Delivery | None:
+        return self._pending.popleft() if self._pending else None
+
+    def record_failure(self, delivery: Delivery) -> int | None:
+        delivery.attempts += 1
+        if delivery.attempts >= self._max_attempts:
+            return None
+        delay = 2 ** (delivery.attempts - 1)
+        self._pending.append(delivery)
+        return delay
+`,
+      },
+      {
+        id: "idempotency",
+        requirement: "Gate 3: schedule skips duplicate event_id when idempotency key already delivered.",
+        code: `from collections import deque
+from dataclasses import dataclass
+
+@dataclass
+class Delivery:
+    event_id: str
+    url: str
+    attempts: int = 0
+
+class WebhookQueue:
+    def __init__(self, max_attempts: int = 5) -> None:
+        self._pending: deque[Delivery] = deque()
+        self._delivered: set[str] = set()
+        self._max_attempts = max_attempts
+
+    def schedule(self, event_id: str, url: str) -> bool:
+        if event_id in self._delivered:
+            return False
+        self._pending.append(Delivery(event_id, url))
+        return True
+
+    def next_pending(self) -> Delivery | None:
+        return self._pending.popleft() if self._pending else None
+
+    def record_success(self, event_id: str) -> None:
+        self._delivered.add(event_id)
+
+    def record_failure(self, delivery: Delivery) -> int | None:
+        delivery.attempts += 1
+        if delivery.attempts >= self._max_attempts:
+            return None
+        delay = 2 ** (delivery.attempts - 1)
+        self._pending.append(delivery)
+        return delay
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "openai-stream-deduplicator",
+    title: "Memory-Bounded Stream Deduplicator",
+    pattern: "hash-map",
+    difficulty: "medium",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 3,
+    motifs: ["hash-lookup", "deque-window"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["mid"],
+    sourceStyle: "OpenAI L4 seen-set then bounded eviction dedupe.",
+    description: "Track seen event IDs with a capped memory footprint.",
+    stages: [
+      {
+        id: "seen-set",
+        requirement: "Gate 1: is_duplicate(event_id) returns True on repeat IDs.",
+        code: `class StreamDedup:
+    def __init__(self) -> None:
+        self._seen: set[str] = set()
+
+    def is_duplicate(self, event_id: str) -> bool:
+        if event_id in self._seen:
+            return True
+        self._seen.add(event_id)
+        return False
+`,
+      },
+      {
+        id: "bounded",
+        requirement: "Gate 2: Evict oldest IDs when seen set exceeds max_size.",
+        code: `from collections import deque
+
+class StreamDedup:
+    def __init__(self, max_size: int = 1000) -> None:
+        self._max_size = max_size
+        self._seen: set[str] = set()
+        self._order: deque[str] = deque()
+
+    def is_duplicate(self, event_id: str) -> bool:
+        if event_id in self._seen:
+            return True
+        self._seen.add(event_id)
+        self._order.append(event_id)
+        if len(self._order) > self._max_size:
+            old = self._order.popleft()
+            self._seen.discard(old)
+        return False
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "openai-lru-cache-staged",
+    title: "LRU Cache (Staged Build)",
+    pattern: "hash-map",
+    difficulty: "medium",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 3,
+    motifs: ["hash-lookup"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["mid"],
+    sourceStyle: "OpenAI L4 gate-style LRU — capacity then thread-safe variant.",
+    description: "Production LRU build; see google-lru-cache for classic one-shot variant.",
+    stages: [
+      {
+        id: "capacity",
+        requirement: "Gate 1: get/put evict least-recently-used entry at capacity.",
+        code: `from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int) -> None:
+        self._cap = capacity
+        self._data: OrderedDict[str, int] = OrderedDict()
+
+    def get(self, key: str) -> int:
+        if key not in self._data:
+            return -1
+        self._data.move_to_end(key)
+        return self._data[key]
+
+    def put(self, key: str, value: int) -> None:
+        if key in self._data:
+            self._data.move_to_end(key)
+        self._data[key] = value
+        if len(self._data) > self._cap:
+            self._data.popitem(last=False)
+`,
+      },
+      {
+        id: "thread-safe",
+        requirement: "Gate 2: Protect get/put with threading.Lock for concurrent access.",
+        code: `from collections import OrderedDict
+import threading
+
+class LRUCache:
+    def __init__(self, capacity: int) -> None:
+        self._cap = capacity
+        self._data: OrderedDict[str, int] = OrderedDict()
+        self._lock = threading.Lock()
+
+    def get(self, key: str) -> int:
+        with self._lock:
+            if key not in self._data:
+                return -1
+            self._data.move_to_end(key)
+            return self._data[key]
+
+    def put(self, key: str, value: int) -> None:
+        with self._lock:
+            if key in self._data:
+                self._data.move_to_end(key)
+            self._data[key] = value
+            if len(self._data) > self._cap:
+                self._data.popitem(last=False)
+`,
+      },
+    ],
+  }),
 ];
