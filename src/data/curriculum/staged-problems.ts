@@ -1448,4 +1448,119 @@ class LRUCache:
       },
     ],
   }),
+
+  stagedSnippet({
+    id: "anthropic-kv-basics",
+    title: "KV Store Basics",
+    pattern: "hash-map",
+    difficulty: "easy",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 2,
+    motifs: ["hash-lookup"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["junior"],
+    sourceStyle: "Anthropic L3 in-memory KV — set/get before delete.",
+    description: "Approachable KV store; simpler band than the L4 sorted/TTL build.",
+    stages: [
+      {
+        id: "set-get",
+        requirement: "Stage 1: set(key, value) and get(key) returning None when absent.",
+        code: `class SimpleKV:
+    def __init__(self) -> None:
+        self._data: dict[str, str] = {}
+
+    def set(self, key: str, value: str) -> None:
+        self._data[key] = value
+
+    def get(self, key: str) -> str | None:
+        return self._data.get(key)
+`,
+      },
+      {
+        id: "delete",
+        requirement: "Stage 2: delete(key) removes the entry and returns whether it existed.",
+        code: `class SimpleKV:
+    def __init__(self) -> None:
+        self._data: dict[str, str] = {}
+
+    def set(self, key: str, value: str) -> None:
+        self._data[key] = value
+
+    def get(self, key: str) -> str | None:
+        return self._data.get(key)
+
+    def delete(self, key: str) -> bool:
+        if key not in self._data:
+            return False
+        del self._data[key]
+        return True
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "anthropic-simple-lru",
+    title: "Simple LRU Cache",
+    pattern: "hash-map",
+    difficulty: "easy",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 2,
+    motifs: ["hash-lookup"],
+    packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["junior"],
+    sourceStyle: "Anthropic L3 OrderedDict LRU — recency refresh then capacity.",
+    description: "Single-class LRU using OrderedDict; counter archetype skipped (already shipped).",
+    stages: [
+      {
+        id: "recency",
+        requirement: "Stage 1: get and put refresh recency with move_to_end.",
+        code: `from collections import OrderedDict
+
+class SimpleLRU:
+    def __init__(self) -> None:
+        self._data: OrderedDict[str, int] = OrderedDict()
+
+    def get(self, key: str) -> int | None:
+        if key not in self._data:
+            return None
+        self._data.move_to_end(key)
+        return self._data[key]
+
+    def put(self, key: str, value: int) -> None:
+        if key in self._data:
+            self._data.move_to_end(key)
+        self._data[key] = value
+`,
+      },
+      {
+        id: "capacity",
+        requirement: "Stage 2: Evict least-recently-used entry when size exceeds capacity.",
+        code: `from collections import OrderedDict
+
+class SimpleLRU:
+    def __init__(self, capacity: int) -> None:
+        self._cap = capacity
+        self._data: OrderedDict[str, int] = OrderedDict()
+
+    def get(self, key: str) -> int | None:
+        if key not in self._data:
+            return None
+        self._data.move_to_end(key)
+        return self._data[key]
+
+    def put(self, key: str, value: int) -> None:
+        if key in self._data:
+            self._data.move_to_end(key)
+        self._data[key] = value
+        if len(self._data) > self._cap:
+            self._data.popitem(last=False)
+`,
+      },
+    ],
+  }),
 ];
