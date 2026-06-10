@@ -99,14 +99,20 @@ export function resurfacingWeight(snippet: Snippet, results: TypingResult[]): nu
   return 0.5 + weakness * 1.5 + hesitationFactor * 0.8 + spacing;
 }
 
-const STAGED_TRACKS: CompanyTrackId[] = ["anthropic", "openai"];
+const DEDICATED_TRACKS: CompanyTrackId[] = [
+  "anthropic",
+  "openai",
+  "google",
+  "meta",
+  "deepmind",
+];
 
-/** Prefer track-specific staged problems; fall back to classic snippets. */
+/** Prefer track-specific dedicated seeds; fall back to classic pool. */
 function applyTrackPoolPreference(pool: Snippet[], trackId: CompanyTrackId): Snippet[] {
-  if (!STAGED_TRACKS.includes(trackId)) return pool;
+  if (!DEDICATED_TRACKS.includes(trackId)) return pool;
   const packId = `company-${trackId}`;
-  const staged = pool.filter((s) => isStagedSnippet(s) && s.packIds?.includes(packId));
-  if (staged.length > 0) return staged;
+  const dedicated = pool.filter((s) => s.packIds?.includes(packId));
+  if (dedicated.length > 0) return dedicated;
   const classic = pool.filter((s) => !isStagedSnippet(s));
   return classic.length > 0 ? classic : pool;
 }

@@ -101,6 +101,9 @@ export type SyntaxMotif =
 
 export type FluencyLevel = 1 | 2 | 3 | 4 | 5;
 
+/** How this snippet is presented in the typing engine. */
+export type SnippetFormat = "classic" | "staged" | "comprehension";
+
 /** One escalating gate in a multi-stage interview-style problem. */
 export interface SnippetStage {
   id: string;
@@ -129,6 +132,14 @@ export interface Snippet {
   variantOf?: string;
   /** Content packs this snippet belongs to (e.g. blind-75-track). */
   packIds?: string[];
+  /** Company tracks this seed targets (mirrors packIds when set). */
+  tracks?: CompanyTrackId[];
+  /** Career levels this problem is authored for (e.g. mid–senior). */
+  levelRange?: CareerLevelId[];
+  /** Presentation format — inferred from stages when omitted. */
+  format?: SnippetFormat;
+  /** One line: what real interview format this mirrors. */
+  sourceStyle?: string;
   /** Ordered stages for progressive system-building problems; `code` mirrors stage 1. */
   stages?: SnippetStage[];
   /** Evidence-weighted associations — computed or curated override. */

@@ -12,6 +12,9 @@ export const STAGED_SNIPPETS = [
     fluencyLevel: 3,
     motifs: ["hash-lookup", "counter-defaultdict"],
     packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["mid"],
+    sourceStyle: "Anthropic multi-tier KV → sorted keys → TTL escalation.",
     description: "Multi-stage system build — canonical Anthropic-style escalation.",
     stages: [
       {
@@ -87,6 +90,9 @@ class KVStore:
     fluencyLevel: 3,
     motifs: ["deque-window", "counter-defaultdict"],
     packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["mid"],
+    sourceStyle: "Anthropic production rate limiter with explicit retry timing.",
     description: "Concurrency-friendly rate limiting in pure Python.",
     stages: [
       {
@@ -152,6 +158,9 @@ class RateLimiter:
     fluencyLevel: 3,
     motifs: ["hash-lookup"],
     packIds: ["company-anthropic"],
+    tracks: ["anthropic"],
+    levelRange: ["mid"],
+    sourceStyle: "Anthropic config store with required-key validation.",
     description: "Load and validate configuration from disk.",
     stages: [
       {
@@ -215,6 +224,9 @@ class ConfigStore:
     fluencyLevel: 3,
     motifs: ["hash-lookup", "counter-defaultdict"],
     packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["mid"],
+    sourceStyle: "OpenAI gate-style time-based KV with delete and absent-key edge case.",
     description: "OpenAI canonical progressive KV with timestamps.",
     stages: [
       {
@@ -305,6 +317,9 @@ class ConfigStore:
     fluencyLevel: 3,
     motifs: ["enumerate-index"],
     packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["mid"],
+    sourceStyle: "OpenAI resumable iterator — checkpoint and resume gates.",
     description: "Checkpoint and resume iteration over a data source.",
     stages: [
       {
@@ -369,6 +384,9 @@ class ConfigStore:
     fluencyLevel: 3,
     motifs: ["deque-window"],
     packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["mid"],
+    sourceStyle: "OpenAI sliding-window limiter with remaining capacity.",
     description: "Sliding-window request limiter — OpenAI infra pattern.",
     stages: [
       {

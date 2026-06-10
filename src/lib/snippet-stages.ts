@@ -45,6 +45,7 @@ export function stagedSnippet(input: StagedSnippetInput): Snippet {
     fluencyLevel: input.fluencyLevel ?? 2,
     motifs: input.motifs ?? [],
     ...input,
+    format: input.format ?? "staged",
     code: normalizeStageCode(input.code ?? firstCode),
   };
 }
