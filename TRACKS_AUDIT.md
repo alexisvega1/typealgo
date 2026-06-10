@@ -169,26 +169,61 @@ Track `tagline` / `cognitiveProfile` shown on curriculum page; **not** shown in 
 
 | Track | Spec minimum | Shipped | Gap |
 |-------|-------------|---------|-----|
-| Anthropic | 6 staged | 3 staged | 3 — event log, counter, thread-safe queue |
-| OpenAI | 6 staged | 3 staged | 3 — retry/DLQ, IP iterator, versioned KV |
-| Google | 9 classic | 0 dedicated | 9 |
-| DeepMind | 9 (6+3 ML) | 0 dedicated | 9 |
-| Meta | 9 classic | 0 dedicated | 9 (product completeness; lowest priority) |
+| Anthropic | 6 staged | **6 staged** | 0 |
+| OpenAI | 6 staged | **6 staged** | 0 |
+| Google | 9 classic | **9 classic** | 0 |
+| DeepMind | 9 (6+3 ML) | **9** | 0 |
+| Meta | 9 classic | **9 classic** | 0 |
 
-Schema fields `level_range`, `format`, `source_style` from the content spec are **not yet on `Snippet`** — Phase 0 of authoring run. Staged problems use `packIds` + implicit L4 band today.
+Schema fields `levelRange`, `format`, `sourceStyle` are on `Snippet` (Phase 0, commit `eaeb22b`). Staged problems carry `packIds`, `tracks`, and metadata.
 
-### Shipped seed log (Phase 5 — pre-spec review)
+### Shipped seed log (June 2026 local authoring run)
 
 | Name | Track | Level | Format | Stages | Rationale |
 |------|-------|-------|--------|--------|-----------|
 | In-Memory KV Store | anthropic | L4 (mid) | staged | 3 | Canonical Anthropic KV → sorted keys → TTL escalation |
-| Token Bucket Rate Limiter | anthropic | L4 | staged | 2 | Fixed-window allow → retry-after (partial sliding path) |
+| Token Bucket Rate Limiter | anthropic | L4 | staged | 2 | Fixed-window allow → retry-after |
 | File-Backed Config Store | anthropic | L4 | staged | 2 | Load key=value → required-key validation |
+| Append-Only Event Log | anthropic | L4 | staged | 3 | Append → replay from offset → compact/truncate |
+| Windowed Counter Service | anthropic | L3 (junior) | staged | 2 | increment/get → reset_all for new window |
+| Thread-Safe Bounded Queue | anthropic | L5 (senior) | staged | 3 | busy-wait → Lock → Condition + timeout |
 | Time-Based Key-Value Store | openai | L4 | staged | 3 | Timestamped set/get → delete → absent-key edge case |
 | Resumable Iterator | openai | L4 | staged | 2 | Iterate → checkpoint/resume |
 | Sliding-Window Rate Limiter | openai | L4 | staged | 2 | Sliding allow → remaining slots |
+| Retry Queue with Dead Letter | openai | L4 | staged | 3 | Enqueue → exponential backoff → DLQ |
+| IP Address Iterator | openai | L4 | staged | 2 | parse_cidr → lazy IpIterator |
+| Versioned Key-Value Store | openai | L5 (senior) | staged | 3 | Versioned set → get at version → rollback |
+| Merge Two Sorted Arrays | google | L3 | classic | 1 | Two-pointer merge into sorted output |
+| Grid Shortest Path (BFS) | google | L3 | classic | 1 | 4-direction BFS on binary grid |
+| Binary Search on Answer — Ship Capacity | google | L3 | classic | 1 | Feasibility check + binary search on capacity |
+| Topological Sort (Kahn) | google | L4 | classic | 1 | In-degree queue for DAG ordering |
+| Merge Overlapping Intervals | google | L4 | classic | 1 | Sort by start → merge in one pass |
+| Task Scheduler Cooldown | google | L4 | classic | 1 | Counter formula for min intervals with cooldown |
+| Edit Distance (Levenshtein) | google | L5 | classic | 1 | 2D DP tabulation |
+| Trie Insert and Search | google | L5 | classic | 1 | Prefix tree with end-of-word marker |
+| LRU Cache Class | google | L5 | classic | 1 | OrderedDict get/move + eviction |
+| Count Connected Components (DFS) | deepmind | L3 | classic | 1 | DFS flood-fill on adjacency list |
+| Kth Largest via Min-Heap | deepmind | L3 | classic | 1 | Size-k min-heap for top-k |
+| First Bad Version | deepmind | L3 | classic | 1 | Binary search on first failing index |
+| Running Median (Two Heaps) | deepmind | L4 | classic | 1 | Dual-heap median maintenance |
+| Stream Anomaly Detector | deepmind | L4 | classic | 1 | Bounded-window z-score flag |
+| Minimum Path Sum in Grid | deepmind | L4 | classic | 1 | Matrix DP tabulation |
+| Numerically Stable Softmax | deepmind | L5 | classic | 1 | Max-subtraction before exp normalization |
+| Single K-Means Iteration | deepmind | L5 | classic | 1 | Assign to nearest centroid → recompute means |
+| Dot-Product Attention Scores | deepmind | L5 | classic | 1 | Scaled dot products with plain loops |
+| Balanced Bracket Checker | meta | E3 | classic | 1 | Stack scan for nested bracket pairs |
+| Indices That Sum to Target | meta | E3 | classic | 1 | One-pass complement hash lookup |
+| Rolling Average Stream | meta | E3 | classic | 1 | Fixed-window mean after each append |
+| K Nearest Points by Distance | meta | E4 | classic | 1 | Max-heap trim to k smallest distances |
+| Count Subarrays Summing to K | meta | E4 | classic | 1 | Prefix-sum frequency map |
+| Lowest Common Ancestor | meta | E4 | classic | 1 | Recursive LCA with early return |
+| Merge K Sorted Lists | meta | E5 | classic | 1 | Min-heap sweep across list heads |
+| Maximum Path Sum in Binary Tree | meta | E5 | classic | 1 | Post-order gain with global best |
+| Insert Operators to Reach Target | meta | E5 | classic | 1 | DFS over digit splits with +/− |
 
-**Review notes:** Stage headers should be tightened to spec voice (“Now expire keys after a TTL.”). Meta E4 archetypes need original phrasing spot-check when authored. Quantities are minimum-viable — a “double each track” pass is the natural follow-up after quality review.
+**Totals:** 12/12 staged · 27/27 classic dedicated · **39/39 minimum viable**
+
+**Review notes:** Stage headers may be tightened to spec voice in a follow-up polish pass. Google comprehension variants and multi-language mirrors remain deferred.
 
 ---
 
