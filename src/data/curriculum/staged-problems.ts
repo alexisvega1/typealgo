@@ -1563,4 +1563,111 @@ class SimpleLRU:
       },
     ],
   }),
+
+  stagedSnippet({
+    id: "openai-iterator-protocol",
+    title: "Iterator Protocol",
+    pattern: "arrays",
+    difficulty: "easy",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 2,
+    motifs: ["enumerate-index"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["junior"],
+    sourceStyle: "OpenAI L3 gate-style __iter__/__next__ over a fixed range.",
+    description: "Basic iterator protocol before the L4 resumable iterator build.",
+    stages: [
+      {
+        id: "iter-next",
+        requirement: "Gate 1: __iter__ returns self; __next__ yields 0..n-1.",
+        code: `class RangeIterator:
+    def __init__(self, n: int) -> None:
+        self._n = n
+        self._i = 0
+
+    def __iter__(self) -> "RangeIterator":
+        return self
+
+    def __next__(self) -> int:
+        if self._i >= self._n:
+            raise StopIteration
+        value = self._i
+        self._i += 1
+        return value
+`,
+      },
+      {
+        id: "exhaustion",
+        requirement: "Gate 2: Iterate a list; raise StopIteration after the final element.",
+        code: `class ListIterator:
+    def __init__(self, items: list[int]) -> None:
+        self._items = items
+        self._i = 0
+
+    def __iter__(self) -> "ListIterator":
+        return self
+
+    def __next__(self) -> int:
+        if self._i >= len(self._items):
+            raise StopIteration
+        value = self._items[self._i]
+        self._i += 1
+        return value
+`,
+      },
+    ],
+  }),
+
+  stagedSnippet({
+    id: "openai-fixed-window-limiter",
+    title: "Fixed-Window Rate Limiter",
+    pattern: "stack",
+    difficulty: "easy",
+    language: "python",
+    tier: "interview-fluency",
+    fluencyLevel: 2,
+    motifs: ["deque-window"],
+    packIds: ["company-openai"],
+    tracks: ["openai"],
+    levelRange: ["junior"],
+    sourceStyle: "OpenAI L3 fixed-window allow/deny before sliding-window limiter.",
+    description: "Precursor to openai-sliding-rate-limiter — count-based window reset.",
+    stages: [
+      {
+        id: "allow-deny",
+        requirement: "Gate 1: allow() returns False when the window count is exhausted.",
+        code: `class FixedWindowLimiter:
+    def __init__(self, max_requests: int) -> None:
+        self._max = max_requests
+        self._count = 0
+
+    def allow(self) -> bool:
+        if self._count >= self._max:
+            return False
+        self._count += 1
+        return True
+`,
+      },
+      {
+        id: "window-reset",
+        requirement: "Gate 2: reset() clears the count to start a fresh window.",
+        code: `class FixedWindowLimiter:
+    def __init__(self, max_requests: int) -> None:
+        self._max = max_requests
+        self._count = 0
+
+    def allow(self) -> bool:
+        if self._count >= self._max:
+            return False
+        self._count += 1
+        return True
+
+    def reset(self) -> None:
+        self._count = 0
+`,
+      },
+    ],
+  }),
 ];
