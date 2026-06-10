@@ -4,6 +4,7 @@ import { CORE_REFLEX_SNIPPETS } from "./core-reflex";
 import { INTERVIEW_FLUENCY_SNIPPETS } from "./interview-fluency";
 import { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
 import { STAGED_SNIPPETS } from "./staged-problems";
+import { GOOGLE_SNIPPETS } from "./company-google";
 import { CURRICULUM_TIERS } from "./tiers";
 import { isStagedSnippet } from "@/lib/snippet-stages";
 
@@ -15,12 +16,14 @@ export { INTERVIEW_FLUENCY_SNIPPETS } from "./interview-fluency";
 export { ADVANCED_FLUENCY_SNIPPETS } from "./advanced-fluency";
 
 export { STAGED_SNIPPETS } from "./staged-problems";
+export { GOOGLE_SNIPPETS } from "./company-google";
 
 export const SNIPPETS: Snippet[] = [
   ...CORE_REFLEX_SNIPPETS,
   ...INTERVIEW_FLUENCY_SNIPPETS,
   ...ADVANCED_FLUENCY_SNIPPETS,
   ...STAGED_SNIPPETS,
+  ...GOOGLE_SNIPPETS,
 ];
 
 export const SNIPPET_BY_ID = new Map(SNIPPETS.map((s) => [s.id, s]));
