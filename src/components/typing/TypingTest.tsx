@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -13,6 +14,7 @@ import clsx from "clsx";
 import { playTypingClick } from "@/lib/typing-sound";
 import { pickSnippet } from "@/data/curriculum";
 import {
+  assertStageContentSync,
   snippetStageCode,
   snippetStageCount,
   snippetStageLabel,
@@ -30,7 +32,7 @@ import {
   isAutoKeystroke,
   isStructuralChar,
 } from "@/lib/semantic-traversal";
-import { applyCharPending, applyCharTyped, resetAllChars, showAllCharsReview } from "@/lib/typing-display";
+import { applyCharPending, applyCharTyped, showAllCharsReview } from "@/lib/typing-display";
 import {
   effectiveRecallMode,
   isRecallTraining,
@@ -130,6 +132,8 @@ export function TypingTest() {
   const startTimeRef = useRef<number | null>(null);
   const lastKeyTimeRef = useRef<number | null>(null);
   const keystrokesRef = useRef<KeystrokeEvent[]>([]);
+  /** Per-index typing outcome; survives display re-inits until stage/snippet change. */
+  const charOutcomesRef = useRef<(boolean | null)[]>([]);
   const snippetRef = useRef<Snippet | null>(null);
   const activeLineRef = useRef(-1);
   const finishedRef = useRef(false);
@@ -239,6 +243,7 @@ export function TypingTest() {
       }
 
       charRefs.current = new Array(tokensRef.current.length).fill(null);
+      charOutcomesRef.current = new Array(tokensRef.current.length).fill(null);
       lineRefs.current = [];
       activeLineRef.current = -1;
       setTick((t) => t + 1);
@@ -393,12 +398,23 @@ export function TypingTest() {
       applyReviewStyles();
       return;
     }
-    resetAllChars(
-      charRefs.current,
-      tokensRef.current,
-      blankMaskRef.current,
-      revealedRef.current,
-    );
+    const outcomes = charOutcomesRef.current;
+    charRefs.current.forEach((el, i) => {
+      if (!el || !tokensRef.current[i]) return;
+      const outcome = outcomes[i];
+      if (outcome === null || outcome === undefined) {
+        applyCharPending(
+          el,
+          i,
+          tokensRef.current,
+          indexRef.current,
+          blankMaskRef.current,
+          revealedRef.current,
+        );
+      } else {
+        applyCharTyped(el, i, tokensRef.current, outcome, blankMaskRef.current);
+      }
+    });
     lineRefs.current.forEach((line) =>
       line?.classList.remove(
         "code-line-active",
@@ -433,7 +449,7 @@ export function TypingTest() {
 
     blankMaskRef.current = buildRecallPlan(
       tokens,
-      s.code,
+      snippetStageCode(s, stageIndexRef.current),
       recallModeRef.current,
       intensity,
     ).blankMask;
@@ -445,7 +461,7 @@ export function TypingTest() {
         recallModeRef.current = mobileRecall;
         blankMaskRef.current = buildRecallPlan(
           tokens,
-          s.code,
+          snippetStageCode(s, stageIndexRef.current),
           mobileRecall,
           intensity,
         ).blankMask;
@@ -453,7 +469,7 @@ export function TypingTest() {
     }
   }, [settings.trainingMode, settings.recallMode]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     rebuildBlankMaskForMode();
     resetDisplay();
   }, [
@@ -671,6 +687,7 @@ export function TypingTest() {
           });
         }
         if (el) {
+          charOutcomesRef.current[idx] = true;
           applyCharTyped(el, idx, tokens, true, blankMaskRef.current);
           el.classList.add("char-structural-auto");
         }
@@ -867,6 +884,7 @@ export function TypingTest() {
 
       const el = charRefs.current[idx];
       if (el) {
+        charOutcomesRef.current[idx] = true;
         applyCharTyped(el, idx, tokens, true, blankMaskRef.current);
         flashChar(el, true);
       }
@@ -905,6 +923,7 @@ export function TypingTest() {
       }
       const el = charRefs.current[idx];
       if (el) {
+        charOutcomesRef.current[idx] = correct;
         applyCharTyped(el, idx, tokens, correct, blankMaskRef.current);
         flashChar(el, correct);
       }
@@ -1015,6 +1034,7 @@ export function TypingTest() {
             else blankIncorrectRef.current--;
           }
           revealedRef.current.delete(charIdx);
+          charOutcomesRef.current[charIdx] = null;
           const el = charRefs.current[charIdx];
           if (el) {
             applyCharPending(el, charIdx, tokens, charIdx, blankMaskRef.current, revealedRef.current);
@@ -1051,9 +1071,18 @@ export function TypingTest() {
     loadSnippet();
   }, [finishedCoach, loadSnippet, setRecallMode, setTrainingMode]);
 
+  const activeStageCode = useMemo(
+    () => (snippet ? snippetStageCode(snippet, stageIndex) : ""),
+    [snippet, stageIndex],
+  );
+
+  useEffect(() => {
+    if (snippet) assertStageContentSync(snippet, stageIndex, activeStageCode);
+  }, [snippet, stageIndex, activeStageCode]);
+
   const codeLines = useMemo(() => {
     if (!snippet) return [];
-    const tokens = tokenizeCode(snippet.code, snippet.language);
+    const tokens = tokenizeCode(activeStageCode, snippet.language);
     const lines: { tokens: CharToken[]; startIndex: number }[] = [];
     let current: CharToken[] = [];
     let startIndex = 0;
@@ -1068,7 +1097,7 @@ export function TypingTest() {
     });
     if (current.length) lines.push({ tokens: current, startIndex });
     return lines;
-  }, [snippet]);
+  }, [snippet, activeStageCode]);
 
   if (!snippet) {
     return (
@@ -1139,7 +1168,7 @@ export function TypingTest() {
         >
           <AnimatePresence mode="wait">
             <motion.div
-              key={`${snippet.id}-${settings.trainingMode}-${activeRecallMode}`}
+              key={`${snippet.id}-${stageIndex}-${settings.trainingMode}-${activeRecallMode}`}
               initial={{ opacity: 0, y: isReviewMode ? 4 : 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: isReviewMode ? -4 : -8 }}
@@ -1148,7 +1177,11 @@ export function TypingTest() {
                 ease: [0.22, 1, 0.36, 1] as const,
               }}
               onAnimationComplete={(definition) => {
-                if (definition !== "exit") resetDisplay();
+                if (definition === "exit") return;
+                if (indexRef.current > 0 || keystrokesRef.current.length > 0) return;
+                resetDisplay();
+                autoAdvanceStructural(performance.now());
+                updateCursor(indexRef.current);
               }}
             >
               <div
