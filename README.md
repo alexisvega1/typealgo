@@ -2,6 +2,8 @@
 
 **Type something that matters.** — algorithmic fluency training.
 
+**Try it live → [typealgo.com](https://typealgo.com)**
+
 > Most interview prep focuses on problem exposure.
 >
 > TypeAlgo focuses on procedural fluency: turning common implementation patterns into reflexes through retrieval, repetition, and pressure-tested execution.
@@ -10,7 +12,7 @@
 
 TypeAlgo is a performance-first typing trainer for algorithmic implementation. It trains **syntax motifs** — reusable chunks like BFS queue loops, binary search boundaries, and DP tabulation — across four cognitive modes designed to mirror how engineers actually learn.
 
-![TypeAlgo typing session](./docs/screenshots/typing-session.png)
+![TypeAlgo demo: typing a binary-search snippet at 124 WPM with live accuracy, then the session summary and coach recommendation](./docs/screenshots/typealgo-demo.gif)
 
 ---
 
@@ -98,9 +100,7 @@ npm run audit:auth
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/alexisvega1/typealgo)
 
-Recommended Vercel subdomain: **`typealgo.vercel.app`**
-
-Future domain: **`typealgo.ai`**
+Live at **[typealgo.com](https://typealgo.com)** (also `typealgo.vercel.app`).
 
 ---
 
@@ -115,3 +115,7 @@ Next.js 16 · TypeScript · Tailwind v4 · Zustand · Framer Motion · Recharts 
 MIT — see [LICENSE](./LICENSE).
 
 All curriculum implementations are independently authored.
+
+---
+
+Built by [Alexis Vega Medina](https://github.com/alexisvega1).

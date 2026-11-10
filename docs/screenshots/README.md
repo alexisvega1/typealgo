@@ -1,10 +1,6 @@
-# Screenshot placeholders
+# Screenshots
 
-Add captures here for the README:
+- `typealgo-demo.gif` — Type mode: a Sqrt(x) binary-search snippet typed live, ending on the session summary (used at the top of the main README)
+- `typing-session.png` — Type mode mid-session with syntax highlighting, WPM and accuracy
 
-- `typing-session.png` — Type mode with syntax highlighting
-- `recall-mode.png` — Token recall with confidence bar
-- `review-mode.png` — Consolidation panel with motif focus
-- `sprint-mode.png` — Sprint HUD with countdown
-- `stats-dashboard.png` — Analytics page with heatmap + radar
-- `curriculum-tracks.png` — Evidence-weighted fluency tracks panel
+Still wanted: `recall-mode.png`, `review-mode.png`, `sprint-mode.png`, `stats-dashboard.png`, `curriculum-tracks.png`.

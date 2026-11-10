@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fira_Code, Geist, Geist_Mono, IBM_Plex_Mono, JetBrains_Mono, Source_Code_Pro } from "next/font/google";
 import { Header } from "@/components/layout/Header";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SITE_URL } from "@/lib/site";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
 
@@ -56,15 +58,27 @@ export const metadata: Metadata = {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  metadataBase: new URL(SITE_URL),
+  authors: [{ name: "Alexis Vega Medina", url: "https://github.com/alexisvega1" }],
+  creator: "Alexis Vega Medina",
+  keywords: [
+    "coding interview prep",
+    "typing trainer for programmers",
+    "algorithms",
+    "data structures",
+    "spaced repetition",
+    "leetcode patterns",
+  ],
   openGraph: {
-    title: "TypeAlgo",
-    description: "Algorithmic fluency training. Type, Recall, Review, Sprint.",
+    title: "TypeAlgo — Algorithmic Fluency Training",
+    description:
+      "Turn common algorithm patterns into reflexes. Type, recall, review and sprint through BFS loops, binary search bounds and DP tables.",
     siteName: "TypeAlgo",
     type: "website",
   },
   twitter: {
-    card: "summary",
-    title: "TypeAlgo",
+    card: "summary_large_image",
+    title: "TypeAlgo — Algorithmic Fluency Training",
     description: "Implementation cognition, not problem dumps.",
   },
 };
@@ -89,6 +103,7 @@ export default function RootLayout({
         <AppProviders>
           <Header />
           <div className="app-main flex flex-1 flex-col">{children}</div>
+          <SiteFooter />
         </AppProviders>
       </body>
     </html>
